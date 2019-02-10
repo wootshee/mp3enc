@@ -11,7 +11,9 @@
 
 #include <string>
 
+#include <errno.h>
 #include <glob.h>
+#include <memory.h>
 #include <unistd.h>
 
 namespace mp3enc {

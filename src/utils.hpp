@@ -11,7 +11,9 @@
 
 #include <string>
 
+#include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 namespace mp3enc {
 namespace utils {

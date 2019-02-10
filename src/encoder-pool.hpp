@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <pthread.h>
+#include <stdint.h>
 
 namespace mp3enc {
     // EncoderPool class manages a pool of worker threads
