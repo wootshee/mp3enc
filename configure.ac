@@ -23,7 +23,8 @@ AC_TYPE_SIZE_T
 AC_FUNC_STRERROR_R
 AC_CHECK_FUNCS([memset])
 
+AC_SUBST([AM_CXXFLAGS])
+
 AC_CONFIG_FILES([Makefile src/Makefile])
-#AC_CONFIG_SUBDIRS([extern/lame
-#                   extern/pthreads])
+AC_CONFIG_SUBDIRS([extern/lame])
 AC_OUTPUT
