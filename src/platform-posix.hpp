@@ -9,6 +9,8 @@
 #ifndef platform_posix_h
 #define platform_posix_h
 
+#include "config.h"
+
 #include <string>
 
 #include <errno.h>
@@ -23,6 +25,13 @@ namespace platform {
         // POSIX supports extended glob wildcards and case sensitive
         // file systems
         static const bool CaseSensitiveGlob = true;
+
+		#ifdef WORDS_BIGENDIAN
+		static const bool BigEndian = true;
+		#else
+		static const bool BigEndian = false;
+		#endif
+		
         
         static const int CpuCores() {
             return static_cast<int>(sysconf(_SC_NPROCESSORS_ONLN));

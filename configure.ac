@@ -23,8 +23,18 @@ AC_TYPE_SIZE_T
 AC_FUNC_STRERROR_R
 AC_CHECK_FUNCS([memset])
 
+# Check pthread lib
+AC_SEARCH_LIBS(pthread_create, pthread, [PTHREADLIB=$LIBS])
+AC_SUBST(PTHREADLIB)
+
+# Detect endianness
+AC_C_BIGENDIAN
+
+AC_SEARCH_LIBS(lame_init, lame, [LAMELIB=$LIBS])
+AC_SUBST(LAMELIB)
+
 AC_SUBST([AM_CXXFLAGS])
 
 AC_CONFIG_FILES([Makefile src/Makefile])
-AC_CONFIG_SUBDIRS([extern/lame])
+AC_CONFIG_SUBDIRS([src/extern/lame])
 AC_OUTPUT
