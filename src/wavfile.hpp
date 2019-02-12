@@ -23,8 +23,8 @@ namespace mp3enc {
 	template <class Platform>
 	class WavFile {
 		utils::InputFile _file;
-		int _error;
 		bool _msb;
+		bool _valid;
 		size_t _size;
 		int _channels;
 		int _sampleRate;
@@ -36,28 +36,17 @@ namespace mp3enc {
 		, _size(0)
 		, _channels(0)
 		, _sampleRate(0) {
-			const bool ok = parseRiffChunk() && parseFormatChunk() && parseDataChunk();
-			if (!ok) {
-				_error = EIO;
-			}
+			_valid = parseRiffChunk() && parseFormatChunk() && parseDataChunk();
 		}
 
 		~WavFile() {
 		}
 
-		size_t ReadSamples(size_t num, short* dest) {
+		int ReadSamples(size_t num, short* dest) {
+			if (!_valid)
+				return -1;
 			const size_t sampleSize = sizeof(short) * _channels;
-			const size_t read = _file.Read(dest, sampleSize);
-			if (read != num) {
-				if (_file.Error()) {
-					_error = EIO;
-				}
-			}
-			return read;
-		}
-
-		int Error() const {
-			return _error;
+			return _file.Read(dest, num * sampleSize) / sampleSize;
 		}
 		
 	private:

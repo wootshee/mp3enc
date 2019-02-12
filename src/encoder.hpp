@@ -9,55 +9,27 @@
 #ifndef encoder_h
 #define encoder_h
 
-#include <cassert>
-
-#include "lame.h"
-
-#include <stdio.h>
+#include <cstddef>
 
 namespace mp3enc {
 
-	template <class AudioFile>
-	class Encoder {
+	//
+	// Public encoder interfaces
+	//
 
-		class Lame {
-			lame_global_flags* _lame;
+	struct AudioInputStream {
+		virtual ~AudioInputStream() {};
+		virtual int GetChannels() = 0;
+		virtual int GetSampleRate() = 0;
+		virtual size_t GetTotalSamples() = 0;
+		virtual int ReadSamples(void* buf, size_t numSamples) = 0;
+	};
 
-			// Not interested in copying and assignment
-			// for the sake of simplicity
-			Lame(const Lame&);
-			Lame& operator=(const Lame&);			
-			
-		public:
-			Lame()
-			: _lame(lame_init()) {
-				assert(_lame);
-				// Silence lame and let EncoderPool
-				// report errors in controlled manner
-				lame_set_errorf(_lame, NULL);
-				lame_set_debugf(_lame, NULL);
-				lame_set_msgf(_lame, NULL);
-			}
-			~Lame() {
-				if (_lame) {
-					lame_close(_lame);
-					_lame = NULL;
-				}
-			}
-
-		} _lame;
-
-		AudioFile& _source;
-
-	public:
-
-		Encoder(AudioFile& source)
-		: _source(source) {
-			
-		}
-
-
-	}; // class Encoder
+	struct AudioOutputStream {
+		virtual ~AudioOutputStream() {};
+		virtual int AttachToInputStream(AudioInputStream* input) = 0;
+		virtual int Encode() = 0;
+	};
 	
 } // namespace mp3enc
 
