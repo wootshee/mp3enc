@@ -9,7 +9,9 @@
 #ifndef encoder_pool_h
 #define encoder_pool_h
 
+#include "encoder.hpp"
 #include "mutex.hpp"
+#include "wavfile.hpp"
 #include "wavqueue.hpp"
 
 #include <cassert>
@@ -24,11 +26,11 @@ namespace mp3enc {
     template <class Platform>
     class EncoderPool {
         threading::Mutex _lock;
-        WavQueue<Platform>& _queue;
+        typename Platform::Glob& _queue;
         std::vector<pthread_t> _workers;
         bool _eof;
     public:
-        EncoderPool(WavQueue<Platform>& queue)
+        EncoderPool(typename Platform::Glob& queue)
         // the mutex is created locked to block the workers
         // until Run() method is called
         : _lock(true)
@@ -62,7 +64,7 @@ namespace mp3enc {
                 const int res = pthread_join(_workers[i], (void**) &workerStatus);
                 assert(res == 0);
                 if (workerStatus != 0) {
-                    status = (int) workerStatus;
+                    status = static_cast<int>(workerStatus);
                 }
             }
             
@@ -121,11 +123,12 @@ namespace mp3enc {
             int status = 0;
             for (std::string file = getFirstFile(); !file.empty(); file = getNextFile(file, status)) {
                 // do actual encoding here
-                
+				WavFile<Platform> input(file);
+				input.ReadSamples(10, NULL);
             }
             return status;
         }
     }; // class EncoderPool
-}
+} // namespace
 
 #endif /* encoder_pool_h */

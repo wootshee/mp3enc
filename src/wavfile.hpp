@@ -9,6 +9,9 @@
 #ifndef wavfile_h
 #define wavfile_h
 
+#include "riff.hpp"
+#include "utils.hpp"
+
 #include <string>
 #include <vector>
 
@@ -19,7 +22,7 @@ namespace mp3enc {
 
 	template <class Platform>
 	class WavFile {
-		FILE* _file;
+		utils::InputFile _file;
 		int _error;
 		bool _msb;
 		size_t _size;
@@ -28,14 +31,11 @@ namespace mp3enc {
 
 	public:
 		WavFile(const std::string path)
-		: _file(fopen(path.c_str(), "rb"))
+		: _file(path.c_str())
 		, _msb(false)
 		, _size(0)
 		, _channels(0)
 		, _sampleRate(0) {
-			if (!_file) {
-				_error = errno;
-			}
 			const bool ok = parseRiffChunk() && parseFormatChunk() && parseDataChunk();
 			if (!ok) {
 				_error = EIO;
@@ -43,16 +43,13 @@ namespace mp3enc {
 		}
 
 		~WavFile() {
-			if (_file) {
-				fclose(_file);
-			}
 		}
 
 		size_t ReadSamples(size_t num, short* dest) {
 			const size_t sampleSize = sizeof(short) * _channels;
-			const size_t read = fread(dest, sampleSize, num, _file);
+			const size_t read = _file.Read(dest, sampleSize);
 			if (read != num) {
-				if (ferror(_file)) {
+				if (_file.Error()) {
 					_error = EIO;
 				}
 			}
@@ -64,27 +61,19 @@ namespace mp3enc {
 		}
 		
 	private:
-	
+
 		bool parseRiffChunk() {
 			// RIFF chunk descriptor
-			#pragma pack(push, 1)
-			struct {
-				char id[4];
-				uint32_t size;
-				char fmt[4];
-			} chunk;
-			#pragma pack(pop)
+			riff::ChunkDescriptor chunk;
 		
 			// Read chunk descriptor and validate it
-			size_t read = fread(&chunk, 1, sizeof(chunk), _file);
-			const bool validChunk =
-				read == sizeof(chunk) &&
+			const bool validChunk = _file.ReadStruct(chunk) &&
 				(0 == strncmp(chunk.id, "RIFF", 4) || 0 == strncmp(chunk.id, "RIFX", 4)) &&
 				0 == strncmp(chunk.fmt, "WAVE", 4);
 			if (!validChunk)
 				return false;
 		
-			// Is the data stored in big endian format?
+			// Is the data stored in big endian (RIFX) format?
 			_msb = (chunk.id[3] == 'X');
 			return true;
 
@@ -92,23 +81,10 @@ namespace mp3enc {
 		
 		bool parseFormatChunk() {
 			// Format sub-chunk
-			#pragma pack(push, 1)
-			struct {
-				char id[4];
-				uint32_t size;
-				uint16_t audio_fmt;
-				uint16_t channels;
-				uint32_t sample_rate;
-				uint32_t byte_rate;
-				uint16_t block_align;
-				uint16_t bits_per_sample;
-			} chunk;
-			#pragma pack(pop)
+			riff::FormatChunk chunk;
 		
 			// Read chunk descriptor and validate it
-			size_t read = fread(&chunk, 1, sizeof(chunk), _file);
-			const bool validChunk = 
-				read == sizeof(chunk) &&
+			const bool validChunk = _file.ReadStruct(chunk) &&
 				0 == strncmp(chunk.id, "fmt ", 4) &&
 				// Only raw 16 bit PCM format is supported
 				utils::native_uint16<Platform>(chunk.size, _msb) == 16 &&
@@ -125,17 +101,10 @@ namespace mp3enc {
 		
 		bool parseDataChunk() {
 			// Data sub-chunk
-			#pragma pack(push, 1)
-			struct {
-				char id[4];
-				uint32_t size;
-			} chunk;
-			#pragma pack(pop)
+			riff::DataChunk chunk;
 		
 			// Read chunk descriptor and validate it
-			size_t read = fread(&chunk, 1, sizeof(chunk), _file);
-			const bool validChunk = 
-				read == sizeof(chunk) &&
+			const bool validChunk = _file.ReadStruct(chunk) &&
 				0 == strncmp(chunk.id, "data", 4);
 			if (!validChunk)
 				return false;

@@ -19,7 +19,7 @@
 // differently :)
 //
 
-#include "config.h"
+#include <config.h>
 
 #include <iostream>
 #include <memory>
@@ -28,6 +28,9 @@
 
 #include "encoder-pool.hpp"
 #include "wavqueue.hpp"
+#include "utils.hpp"
+
+using namespace mp3enc;
 
 void usage() {
     std::cout << "Usage: mp3enc <directory>" << std::endl;
@@ -35,16 +38,20 @@ void usage() {
 
 int main(int argc, const char * argv[]) {
     
-    if (argc > 2) {
+    if (argc != 2) {
         usage();
         return 1;
     }
+
+	std::string pattern(
+		utils::NormalizeDirectory<Platform>(argv[1]) +
+	    (Platform::CaseSensitiveGlob ? "*.[wW][aA][vV]" : "*.wav"));
+
+	Platform::Glob wavFiles(pattern);
     
-    // Prepare queue of input WAV files. Use current directory if
-    // no directory is explicitly given to a command.
-    mp3enc::WavQueue<mp3enc::Platform> queue(argc == 2 ? argv[1] : "");
-    
-    // Initialize and run encoder worker pool using all available CPU cores
-    mp3enc::EncoderPool<mp3enc::Platform> pool(queue);
+    // Initialize and run encoder worker pool on given directory (current
+    // working directory is used if none is given) using all available
+    // CPU cores
+    EncoderPool<Platform> pool(wavFiles);
     return pool.Run();
 }

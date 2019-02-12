@@ -54,8 +54,8 @@ namespace platform {
                 // which silently ignore files on errors, POSIX glob
                 // implementation ignores them as well
                 int res = glob(pattern.c_str(), GLOB_MARK, NULL, &_glob);
-                if (res != 0) {
-                    _error = errno;
+                if (res != GLOB_NOMATCH) {
+                    _error = res;
                 }
             }
             
@@ -64,9 +64,9 @@ namespace platform {
                     globfree(&_glob);
             }
             
-            const char* Next() {
+            std::string Next() {
                 if (_error != 0) {
-                    return NULL;
+                    return std::string();
                 }
                 
                 while (_pos < _glob.gl_pathc) {
@@ -80,11 +80,11 @@ namespace platform {
                 }
                 
                 if (_pos < _glob.gl_pathc)
-                    return _glob.gl_pathv[_pos++];
+                    return std::string(_glob.gl_pathv[_pos++]);
                 
                 // No more files left
                 _error = ENOENT;
-                return NULL;
+                return std::string();
             }
             
             int Error() {
