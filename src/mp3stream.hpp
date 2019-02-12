@@ -72,6 +72,8 @@ namespace mp3enc {
 		}
 
 		virtual int AttachToInputStream(AudioInputStream* input) {
+			_input = input;
+
 			// Prepare codec parameters
 			lame_set_num_channels(_lame, input->GetChannels());
 			lame_set_in_samplerate(_lame, input->GetSampleRate());
@@ -92,13 +94,13 @@ namespace mp3enc {
 		
 		virtual int Encode() {
 			// Encode all input samples to output stream
-			int res = 0;
-			while ((res = _input->ReadSamples(&_inputBuf[0], _samplesToRead)) > 0) {
+			int read = 0;
+			while ((read = _input->ReadSamples(&_inputBuf[0], _samplesToRead)) > 0) {
 				const int encoded =
 					lame_encode_buffer_interleaved(
 						_lame,
 						reinterpret_cast<short*>(&_inputBuf[0]),
-						_samplesToRead,
+						read,
 						&_outputBuf[0],
 						_outputBuf.size());
 				if (encoded != _file.Write(&_outputBuf[0], encoded)) {
@@ -106,7 +108,13 @@ namespace mp3enc {
 				}
 			}
 
-			if (res == -1) {
+			if (read != 0) {
+				return EIO;
+			}
+
+			// Flush last mp3 frame
+			const int encoded = lame_encode_flush(_lame, &_outputBuf[0], _outputBuf.size());
+			if (encoded != _file.Write(&_outputBuf[0], encoded)) {
 				return EIO;
 			}
 			return 0;
