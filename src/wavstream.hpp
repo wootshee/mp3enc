@@ -1,14 +1,15 @@
 //
-//  wavfile.hpp
+//  wavstream.hpp - WAV input stream
 //  mp3enc
 //
 //  Created by Denis Shtyrov on 10.02.19.
 //  Copyright © 2019 wootshee. All rights reserved.
 //
 
-#ifndef wavfile_h
-#define wavfile_h
+#ifndef MP3ENC_WAVSTREAM_HPP
+#define MP3ENC_WAVSTREAM_HPP
 
+#include "audiostream.hpp"
 #include "riff.hpp"
 #include "utils.hpp"
 
@@ -21,32 +22,63 @@
 namespace mp3enc {
 
 	template <class Platform>
-	class WavFile {
+	class WavInputStream : public AudioInputStream {
 		utils::InputFile _file;
 		bool _msb;
 		bool _valid;
-		size_t _size;
+		// since original WAV format uses 32 bit size fields
+		// they should also fit in ints
+		int _totalSamples;
 		int _channels;
 		int _sampleRate;
+		int _samplesRead;
+
+		WavInputStream(const WavInputStream&);
+		WavInputStream& operator=(const WavInputStream&);
 
 	public:
-		WavFile(const std::string path)
-		: _file(path.c_str())
+		WavInputStream(const char* filepath)
+		: _file(filepath)
 		, _msb(false)
-		, _size(0)
+		, _totalSamples(0)
 		, _channels(0)
-		, _sampleRate(0) {
+		, _sampleRate(0)
+		, _samplesRead(0) {
 			_valid = parseRiffChunk() && parseFormatChunk() && parseDataChunk();
 		}
 
-		~WavFile() {
+		virtual ~WavInputStream() {
 		}
 
-		int ReadSamples(size_t num, short* dest) {
+		virtual int GetChannels() const {
+			return _channels;
+		}
+		
+		virtual int GetSampleRate() const {
+			return _sampleRate;
+		}
+		
+		virtual size_t GetTotalSamples() const {
+			return static_cast<size_t>(_totalSamples);
+		}
+
+		virtual int GetBitsPerSample() const {
+			return 16;
+		}
+
+		virtual int ReadSamples(void* dest, int num) {
 			if (!_valid)
 				return -1;
-			const size_t sampleSize = sizeof(short) * _channels;
-			return _file.Read(dest, num * sampleSize) / sampleSize;
+			const int sampleSize = sizeof(short) * _channels;
+			const int read = _file.Read(dest, num * sampleSize) / sampleSize;
+			_samplesRead += read;
+
+			if (read == 0 && _samplesRead != _totalSamples) {
+				// We reached EOF and read unexpected number of samples.
+				// Input must be corrupt!
+				return -1;
+			}
+			return read;
 		}
 		
 	private:
@@ -98,8 +130,8 @@ namespace mp3enc {
 			if (!validChunk)
 				return false;
 		
-			// Save the following data size
-			_size = utils::native_uint32<Platform>(chunk.size, _msb);
+			// Save total number of samples in input stream
+			_totalSamples = utils::native_uint32<Platform>(chunk.size, _msb) / (_channels * 2);
 			return true;
 		}
 		
@@ -107,4 +139,4 @@ namespace mp3enc {
 	
 } // namespace mp3enc
 
-#endif // #ifndef wavfile_h
+#endif // #ifndef MP3ENC_WAVSTREAM_HPP

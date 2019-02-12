@@ -1,13 +1,13 @@
 //
-//  encoder.hpp
+//  audiostream.hpp - Audio stream interfaces
 //  mp3enc
 //
 //  Created by Denis Shtyrov on 10.02.19.
 //  Copyright © 2019 wootshee. All rights reserved.
 //
 
-#ifndef encoder_h
-#define encoder_h
+#ifndef MP3ENC_AUDIOSTREAM_HPP
+#define MP3ENC_AUDIOSTREAM_HPP
 
 #include <cstddef>
 
@@ -19,10 +19,11 @@ namespace mp3enc {
 
 	struct AudioInputStream {
 		virtual ~AudioInputStream() {};
-		virtual int GetChannels() = 0;
-		virtual int GetSampleRate() = 0;
-		virtual size_t GetTotalSamples() = 0;
-		virtual int ReadSamples(void* buf, size_t numSamples) = 0;
+		virtual int GetChannels() const = 0;
+		virtual int GetSampleRate() const = 0;
+		virtual int GetBitsPerSample() const = 0;
+		virtual size_t GetTotalSamples() const = 0;
+		virtual int ReadSamples(void* buf, int numSamples) = 0;
 	};
 
 	struct AudioOutputStream {
@@ -34,4 +35,4 @@ namespace mp3enc {
 } // namespace mp3enc
 
 
-#endif // #ifndef encoder_h
+#endif // #ifndef MP3ENC_AUDIOSTREAM_HPP

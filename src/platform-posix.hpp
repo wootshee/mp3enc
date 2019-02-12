@@ -64,9 +64,9 @@ namespace platform {
                     globfree(&_glob);
             }
             
-            std::string Next() {
+            const char* Next() {
                 if (_error != 0) {
-                    return std::string();
+                    return NULL;
                 }
                 
                 while (_pos < _glob.gl_pathc) {
@@ -80,11 +80,11 @@ namespace platform {
                 }
                 
                 if (_pos < _glob.gl_pathc)
-                    return std::string(_glob.gl_pathv[_pos++]);
+                    return _glob.gl_pathv[_pos++];
                 
                 // No more files left
                 _error = ENOENT;
-                return std::string();
+                return NULL;
             }
             
             int Error() {

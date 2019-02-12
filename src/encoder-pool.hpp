@@ -9,10 +9,9 @@
 #ifndef encoder_pool_h
 #define encoder_pool_h
 
-#include "encoder.hpp"
 #include "mutex.hpp"
-#include "wavfile.hpp"
-#include "wavqueue.hpp"
+#include "mp3stream.hpp"
+#include "wavstream.hpp"
 
 #include <cassert>
 #include <vector>
@@ -78,13 +77,13 @@ namespace mp3enc {
             return reinterpret_cast<void*>(thisPtr->worker());
         }
         
-        std::string getFile() {
+        const char* getFile() {
             if (_eof) {
                 // no more files to process
-                return std::string();
+                return NULL;
             }
             
-            std::string file(_queue.Next());
+            const char* file = _queue.Next();
             switch (_queue.Error()) {
                 case ENOENT:
                     _eof = true;
@@ -100,19 +99,19 @@ namespace mp3enc {
             return file;
         }
         
-        std::string getFirstFile() {
+        const char* getFirstFile() {
             threading::ScopedLock lock(_lock);
             return getFile();
         }
         
-        std::string getNextFile(const std::string processedFile, int status) {
+        const char* getNextFile(const char* processedFile, int status) {
             threading::ScopedLock lock(_lock);
             
             // Report processed file status
             if (status != 0) {
-                utils::print_error((processedFile + ": ").c_str(), status);
+                utils::print_error((std::string(processedFile) + ": ").c_str(), status);
             } else {
-                utils::print_status(stdout, "%s: OK\n", processedFile.c_str());
+                utils::print_status(stdout, "%s: OK\n", processedFile);
             }
             
             // Get next file from the queue
@@ -121,11 +120,32 @@ namespace mp3enc {
         
         int worker() {
             int status = 0;
-            for (std::string file = getFirstFile(); !file.empty(); file = getNextFile(file, status)) {
-                // do actual encoding here
-				WavFile<Platform> input(file);
-				input.ReadSamples(10, NULL);
-            }
+            const char* file = NULL;
+            try {
+	            for (file = getFirstFile(); file; file = getNextFile(file, status)) {
+	                // Open input WAV stream
+					WavInputStream<Platform> input(file);
+	
+					// Create output MP3 stream
+					std::string mp3name(file);
+					mp3name.replace(mp3name.begin() + mp3name.size() - 3, mp3name.end(), "mp3");
+					Mp3OutputStream output(mp3name.c_str());
+	
+					// Encode audio stream
+					status = output.AttachToInputStream(&input);
+					if (status != 0) {
+						continue;
+					}
+					status = output.Encode();
+	            }
+	            
+	            status = 0;
+
+			} catch (std::exception& e) {
+	        	threading::ScopedLock lock(_lock);
+	        	utils::print_status(stderr, "Thread error: %s\n", e.what());
+	        	status = -1;
+	        }
             return status;
         }
     }; // class EncoderPool

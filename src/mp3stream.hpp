@@ -8,14 +8,16 @@
 #ifndef MP3ENC_MP3STREAM_HPP
 #define MP3ENC_MP3STREAM_HPP
 
-#include "encoder.hpp"
+#include "audiostream.hpp"
 #include "utils.hpp"
+
+#include <vector>
 
 #include <lame.h>
 
 namespace mp3enc {
 
-	class OutputMp3Stream : public OutputAudioStream {
+	class Mp3OutputStream : public AudioOutputStream {
 		class Lame {
 			lame_global_flags* _lame;
 
@@ -48,14 +50,17 @@ namespace mp3enc {
 		} _lame;
 
 		utils::OutputFile _file;
-		AudioInput* _input;
+		AudioInputStream* _input;
 		size_t _samplesToRead;
 		std::vector<unsigned char> _inputBuf;
 		std::vector<unsigned char> _outputBuf;
+
+		Mp3OutputStream(const Mp3OutputStream&);
+		Mp3OutputStream& operator=(const Mp3OutputStream&);
 		
 	public:
 
-		OutputMp3Stream(const char* filepath, size_t bufferSize = 128 * 1024 * 1024)
+		Mp3OutputStream(const char* filepath, size_t bufferSize = 128 * 1024 * 1024)
 		: _file(filepath)
 		, _input(NULL)
 		, _samplesToRead(0)
@@ -63,27 +68,32 @@ namespace mp3enc {
 		
 		}
 
-		virtual ~OutputMp3Stream() {
+		virtual ~Mp3OutputStream() {
 		}
 
-		virtual int AttachToInput(AudioInput* input) {
+		virtual int AttachToInputStream(AudioInputStream* input) {
 			// Prepare codec parameters
-			lame_set_num_channels(_lame, input->GetNumChannels());
-			lame_set_in_sample_rate(_lame, input->GetSampleRate());
+			lame_set_num_channels(_lame, input->GetChannels());
+			lame_set_in_samplerate(_lame, input->GetSampleRate());
 			lame_set_num_samples(_lame, input->GetTotalSamples());
+
+			int res = lame_init_params(_lame);
+			if (res < 0) {
+				return -1;
+			}
 
 			_samplesToRead = lame_get_maximum_number_of_samples(_lame, _outputBuf.size());
 
-			// Prepare input buffer (1 second of audio stream seems to be
-			// a good starting point)
-			_inputBuf.resize(input->GetNumChannels() * _samplesInBuffer * input->GetBitsPerSample() / 8);
+			// Prepare input buffer
+			_inputBuf.resize(input->GetChannels() * _samplesToRead * input->GetBitsPerSample() / 8);
 
+			return 0;
 		}
 		
 		virtual int Encode() {
 			// Encode all input samples to output stream
 			int res = 0;
-			while ((res = _input->ReadSamples(&_inputBuf[0], _samplesToRead) > 0) {
+			while ((res = _input->ReadSamples(&_inputBuf[0], _samplesToRead)) > 0) {
 				const int encoded =
 					lame_encode_buffer_interleaved(
 						_lame,

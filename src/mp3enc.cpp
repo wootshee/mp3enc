@@ -27,7 +27,6 @@
 #include "platform.hpp"
 
 #include "encoder-pool.hpp"
-#include "wavqueue.hpp"
 #include "utils.hpp"
 
 using namespace mp3enc;
