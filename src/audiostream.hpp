@@ -28,8 +28,8 @@ namespace mp3enc {
 
 	struct AudioOutputStream {
 		virtual ~AudioOutputStream() {};
-		virtual int AttachToInputStream(AudioInputStream* input) = 0;
-		virtual int Encode() = 0;
+		virtual void AttachToInputStream(AudioInputStream* input) = 0;
+		virtual void Encode() = 0;
 	};
 	
 } // namespace mp3enc

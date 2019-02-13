@@ -13,19 +13,15 @@
 #include "riff.hpp"
 #include "utils.hpp"
 
+#include <stdexcept>
 #include <string>
-#include <vector>
-
-#include <errno.h>
-#include <stdio.h>
 
 namespace mp3enc {
 
 	template <class Platform>
 	class WavInputStream : public AudioInputStream {
 		utils::InputFile _file;
-		bool _msb;
-		bool _valid;
+		bool _bigendian;
 		// since original WAV format uses 32 bit size fields
 		// they should also fit in ints
 		int _totalSamples;
@@ -39,12 +35,14 @@ namespace mp3enc {
 	public:
 		WavInputStream(const char* filepath)
 		: _file(filepath)
-		, _msb(false)
+		, _bigendian(false)
 		, _totalSamples(0)
 		, _channels(0)
 		, _sampleRate(0)
 		, _samplesRead(0) {
-			_valid = parseRiffChunk() && parseFormatChunk() && parseDataChunk();
+			parseRiffChunk();
+			parseFormatChunk();
+			parseDataChunk();
 		}
 
 		virtual ~WavInputStream() {
@@ -67,8 +65,15 @@ namespace mp3enc {
 		}
 
 		virtual int ReadSamples(void* dest, int num) {
-			if (!_valid)
-				return -1;
+			if (_samplesRead == _totalSamples) {
+				// Audio stream has been fully consumed
+				return 0;
+			}
+			
+			if (num > _totalSamples - _samplesRead) {
+				num = _totalSamples - _samplesRead;
+			}
+
 			const int sampleSize = sizeof(short) * _channels;
 			const int read = _file.Read(dest, num * sampleSize) / sampleSize;
 			_samplesRead += read;
@@ -76,14 +81,14 @@ namespace mp3enc {
 			if (read == 0 && _samplesRead != _totalSamples) {
 				// We reached EOF and read unexpected number of samples.
 				// Input must be corrupt!
-				return -1;
+				throw std::runtime_error("Unexpected end of WAV stream");
 			}
 			return read;
 		}
 		
 	private:
 
-		bool parseRiffChunk() {
+		void parseRiffChunk() {
 			// RIFF chunk descriptor
 			riff::ChunkDescriptor chunk;
 		
@@ -92,15 +97,14 @@ namespace mp3enc {
 				(0 == strncmp(chunk.id, "RIFF", 4) || 0 == strncmp(chunk.id, "RIFX", 4)) &&
 				0 == strncmp(chunk.fmt, "WAVE", 4);
 			if (!validChunk)
-				return false;
+				throw std::runtime_error("Unsupported RIFF type");
 		
 			// Is the data stored in big endian (RIFX) format?
-			_msb = (chunk.id[3] == 'X');
-			return true;
+			_bigendian = (chunk.id[3] == 'X');
 
 		}
 		
-		bool parseFormatChunk() {
+		void parseFormatChunk() {
 			// Format sub-chunk
 			riff::FormatChunk chunk;
 		
@@ -108,19 +112,18 @@ namespace mp3enc {
 			const bool validChunk = _file.ReadStruct(chunk) &&
 				0 == strncmp(chunk.id, "fmt ", 4) &&
 				// Only raw 16 bit PCM format is supported
-				utils::native_uint16<Platform>(chunk.size, _msb) == 16 &&
-				utils::native_uint16<Platform>(chunk.audio_fmt, _msb) == 1 &&
-				utils::native_uint16<Platform>(chunk.bits_per_sample, _msb) == 16;
+				utils::native_uint16<Platform>(chunk.size, _bigendian) == 16 &&
+				utils::native_uint16<Platform>(chunk.audio_fmt, _bigendian) == 1 &&
+				utils::native_uint16<Platform>(chunk.bits_per_sample, _bigendian) == 16;
 			if (!validChunk)
-				return false;
+				throw std::runtime_error("Unsupported WAV format");
 		
 			// Save audio format parameters
-			_channels = utils::native_uint16<Platform>(chunk.channels, _msb);
-			_sampleRate = utils::native_uint32<Platform>(chunk.sample_rate, _msb);
-			return true;
+			_channels = utils::native_uint16<Platform>(chunk.channels, _bigendian);
+			_sampleRate = utils::native_uint32<Platform>(chunk.sample_rate, _bigendian);
 		}
 		
-		bool parseDataChunk() {
+		void parseDataChunk() {
 			// Data sub-chunk
 			riff::DataChunk chunk;
 		
@@ -128,11 +131,10 @@ namespace mp3enc {
 			const bool validChunk = _file.ReadStruct(chunk) &&
 				0 == strncmp(chunk.id, "data", 4);
 			if (!validChunk)
-				return false;
+				throw std::runtime_error("Invalid RIFF data chunk");
 		
 			// Save total number of samples in input stream
-			_totalSamples = utils::native_uint32<Platform>(chunk.size, _msb) / (_channels * 2);
-			return true;
+			_totalSamples = utils::native_uint32<Platform>(chunk.size, _bigendian) / (_channels * 2);
 		}
 		
 	}; // class WavFile

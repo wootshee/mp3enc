@@ -11,6 +11,8 @@
 
 #include "config.h"
 
+#include "exception.hpp"
+
 #include <string>
 
 #include <errno.h>
@@ -43,19 +45,25 @@ namespace platform {
         class Glob {
             int _pos;
             glob_t _glob;
-            int _error;
             
         public:
             Glob(const std::string& pattern)
-            : _pos(0)
-            , _error(0) {
+            : _pos(0) {
                 memset(&_glob, 0, sizeof(_glob));
                 // To maintain compatibility Win32 find_first/find_next,
                 // which silently ignore files on errors, POSIX glob
                 // implementation ignores them as well
                 int res = glob(pattern.c_str(), GLOB_MARK, NULL, &_glob);
-                if (res != GLOB_NOMATCH) {
-                    _error = res;
+                switch (res) {
+                case 0:
+                case GLOB_NOMATCH:
+                	break;
+                case GLOB_NOSPACE:
+                	throw c_runtime_error(ENOMEM);
+                case GLOB_ABORTED:
+                	throw c_runtime_error(EIO);
+                default:
+                	throw std::runtime_error("Unexpected glob() error");
                 }
             }
             
@@ -64,11 +72,7 @@ namespace platform {
                     globfree(&_glob);
             }
             
-            const char* Next() {
-                if (_error != 0) {
-                    return NULL;
-                }
-                
+            const char* Next() {                
                 while (_pos < _glob.gl_pathc) {
                     const size_t len = strlen(_glob.gl_pathv[_pos]);
                     // skip empty filenames (if any) and directories
@@ -83,12 +87,7 @@ namespace platform {
                     return _glob.gl_pathv[_pos++];
                 
                 // No more files left
-                _error = ENOENT;
                 return NULL;
-            }
-            
-            int Error() {
-                return _error;
             }
         }; // class Glob
         

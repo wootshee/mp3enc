@@ -25,6 +25,7 @@ namespace mp3enc {
     template <class Platform>
     class EncoderPool {
         threading::Mutex _lock;
+        threading::Mutex _lockStdio;
         typename Platform::Glob& _queue;
         std::vector<pthread_t> _workers;
         bool _eof;
@@ -36,7 +37,24 @@ namespace mp3enc {
         , _queue(queue)
         , _workers(Platform::CpuCores())
         , _eof(false) {
-            for (size_t i = 0; i < _workers.size(); ++i) {
+        }
+        
+        // ~EncoderPool()
+        //
+        // Default compiler-generated destructor is sufficient for this class,
+        // since threads are joined in Run() method.
+
+        int Run() {
+        	//
+        	// IMPORTANT!
+        	//
+        	// This method is not thread-safe and it is asusmed that it is called only once
+        	// per lifetime of EncoderPool object.
+        	//
+
+        	
+        	// Create worker pool
+            for (int i = 0; i < _workers.size(); ++i) {
                 const int res = pthread_create(&_workers[i], NULL, threadProc, this);
                 if (res != 0) {
                     // It is highly unlikely that pthread_create() fails on a healthy system.
@@ -44,14 +62,7 @@ namespace mp3enc {
                     utils::abort_on_error(res);
                 }
             }
-        }
-        
-        // ~EncoderPool()
-        //
-        // Default compiler-generated destructor is sufficient for this class,
-        // since threads are joined in Run() method.
-        
-        int Run() {
+
             // Release the mutex and let the workers do their work
             _lock.Unlock();
             
@@ -78,73 +89,58 @@ namespace mp3enc {
         }
         
         const char* getFile() {
-            if (_eof) {
-                // no more files to process
-                return NULL;
-            }
-            
-            const char* file = _queue.Next();
-            switch (_queue.Error()) {
-                case ENOENT:
-                    _eof = true;
-                case 0:
-                    break;
-                default:
-                    // report error
-                    utils::print_error("Error: ", _queue.Error());
-                    // set EOF marker to report the error only by one worker,
-                    // others will simply exit due to EOF
-                    _eof = true;
+            threading::ScopedLock lock(_lock);
+            if (_eof)
+            	return NULL;
+            	
+            const char* file = NULL;
+
+            try {            
+            	file = _queue.Next();
+            } catch (...) {
+            	// Let only one worker report the error
+            	_eof = true;
+            	throw;
             }
             return file;
         }
-        
-        const char* getFirstFile() {
-            threading::ScopedLock lock(_lock);
-            return getFile();
-        }
-        
-        const char* getNextFile(const char* processedFile, int status) {
-            threading::ScopedLock lock(_lock);
-            
-            // Report processed file status
-            if (status != 0) {
-                utils::print_error((std::string(processedFile) + ": ").c_str(), status);
-            } else {
-                utils::print_status(stdout, "%s: OK\n", processedFile);
-            }
-            
-            // Get next file from the queue
-            return getFile();
-        }
-        
+               
         int worker() {
             int status = 0;
             const char* file = NULL;
             try {
-	            for (file = getFirstFile(); file; file = getNextFile(file, status)) {
-	                // Open input WAV stream
-					WavInputStream<Platform> input(file);
-	
-					// Create output MP3 stream
-					std::string mp3name(file);
-					mp3name.replace(mp3name.begin() + mp3name.size() - 3, mp3name.end(), "mp3");
-					Mp3OutputStream output(mp3name.c_str());
-	
-					// Encode audio stream
-					status = output.AttachToInputStream(&input);
-					if (status != 0) {
-						continue;
+	            for (file = getFile(); file; file = getFile()) {
+	            	try {
+		                // Open input WAV stream
+						WavInputStream<Platform> input(file);
+		
+						// Create output MP3 stream
+						std::string mp3name(file);
+						mp3name.replace(mp3name.begin() + mp3name.size() - 3, mp3name.end(), "mp3");
+						Mp3OutputStream output(mp3name.c_str());
+		
+						// Encode audio stream
+						output.AttachToInputStream(&input);
+						output.Encode();
+
+						// Report success
+						threading::ScopedLock lock(_lockStdio);
+						utils::print_status(stdout, "%s: OK\n", file);
+					} catch (std::exception& e) {
+	        			threading::ScopedLock lock(_lockStdio);
+						utils::print_status(stderr, "%s: %s\n", file, e.what());
+						status = -1;
+												
 					}
-					status = output.Encode();
 	            }
-	            
+
+	            // Worker completed successfully
 	            status = 0;
 
 			} catch (std::exception& e) {
-	        	threading::ScopedLock lock(_lock);
-	        	utils::print_status(stderr, "Thread error: %s\n", e.what());
-	        	status = -1;
+	        	threading::ScopedLock lock(_lockStdio);
+	        	utils::print_status(stderr, "Error: %s\n", e.what());
+	        	status = 1;
 	        }
             return status;
         }

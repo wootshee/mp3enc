@@ -9,6 +9,8 @@
 #ifndef utils_h
 #define utils_h
 
+#include "exception.hpp"
+
 #include <cassert>
 #include <string>
 
@@ -73,7 +75,14 @@ namespace utils {
 		File(const File&);
 		File& operator=(const File&);
 	public:
-		File(FILE* file) : _file(file) {}
+		File(FILE* file) : _file(file) {
+			if (!file) {
+				// It is assummed that File() constructor is called from either InputFile
+				// or OutputFile constructors with return value of fopen as it's argument.
+				// Hence, we can assume that errno is still relevant at this point.
+				throw c_runtime_error(errno);
+			}
+		}
 
 		// It is expected that objects of this class are always allocated on the stack
 		// and never used through pointers. Therefore it is safe to use non-virtual

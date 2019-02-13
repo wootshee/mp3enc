@@ -71,7 +71,7 @@ namespace mp3enc {
 		virtual ~Mp3OutputStream() {
 		}
 
-		virtual int AttachToInputStream(AudioInputStream* input) {
+		virtual void AttachToInputStream(AudioInputStream* input) {
 			_input = input;
 
 			// Prepare codec parameters
@@ -81,19 +81,18 @@ namespace mp3enc {
 
 			int res = lame_init_params(_lame);
 			if (res < 0) {
-				return -1;
+				throw std::runtime_error("Failed to initialize LAME encoder");
 			}
 
 			_samplesToRead = lame_get_maximum_number_of_samples(_lame, _outputBuf.size());
 
 			// Prepare input buffer
 			_inputBuf.resize(input->GetChannels() * _samplesToRead * input->GetBitsPerSample() / 8);
-
-			return 0;
 		}
 		
-		virtual int Encode() {
+		virtual void Encode() {
 			// Encode all input samples to output stream
+			static const char* WRITE_ERROR = "Failed to write MP3 stream"; 
 			int read = 0;
 			while ((read = _input->ReadSamples(&_inputBuf[0], _samplesToRead)) > 0) {
 				const int encoded =
@@ -103,27 +102,25 @@ namespace mp3enc {
 						read,
 						&_outputBuf[0],
 						_outputBuf.size());
-				if (encoded != _file.Write(&_outputBuf[0], encoded)) {
-					return EIO;
+				if (encoded < 0) {
+					throw std::runtime_error("lame_encode_buffer_interleaved() failed");
 				}
-			}
-
-			if (read != 0) {
-				return EIO;
+				if (encoded != _file.Write(&_outputBuf[0], encoded)) {
+					throw std::runtime_error(WRITE_ERROR);
+				}
 			}
 
 			// Flush last mp3 frame
 			const int encoded = lame_encode_flush(_lame, &_outputBuf[0], _outputBuf.size());
-			if (encoded != _file.Write(&_outputBuf[0], encoded)) {
-				return EIO;
+			if (encoded < 0) {
+				throw std::runtime_error("lame_encode_flush() failed");
 			}
-			return 0;
+
+			if (encoded != _file.Write(&_outputBuf[0], encoded)) {
+				throw std::runtime_error(WRITE_ERROR);
+			}
 		}
-		
-	
 	}; // class OutputMp3Stream
-	
-	
 } // namespace mp3enc
 
 #endif // #ifndef MP3ENC_MP3STREAM_HPP

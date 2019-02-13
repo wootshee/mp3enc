@@ -14,6 +14,8 @@
 #include <windows.h>
 #include <io.h>
 
+#include "exception.hpp"
+
 namespace mp3enc {
 namespace platform {
     struct Win32 {
@@ -52,7 +54,7 @@ namespace platform {
             : _handle(_findfirst(pattern.c_str(), &_data))
             , _error(0) {
                 if (_handle == -1) {
-                    _error = errno;
+                    throw c_runtime_error(error);
                 }
             }
             
@@ -61,9 +63,9 @@ namespace platform {
                     _findclose(_handle);
             }
             
-            std::string Next() {
+            const char* Next() {
                 if (_error != 0) {
-                    return NULL;
+                    throw c_runtime_error(_error);
                 }
                 
                 // skip subdirectories
@@ -72,15 +74,11 @@ namespace platform {
                         return NULL;
                     }
                 }
-                std::string res(_data.name);
+                const char* res = _data.name;
                 findnext();
                 return res;
             }
-            
-            int Error() {
-                return _error;
-            }
-        }; // class Glob
+		}; // class Glob
         
     }; // struct Win32
     
