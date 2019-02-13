@@ -42,15 +42,25 @@ int main(int argc, const char * argv[]) {
         return 1;
     }
 
-	std::string pattern(
-		utils::NormalizeDirectory<Platform>(argv[1]) +
-	    (Platform::CaseSensitiveGlob ? "*.[wW][aA][vV]" : "*.wav"));
+	int status = 0;
 
-	Platform::Glob wavFiles(pattern);
-    
-    // Initialize and run encoder worker pool on given directory (current
-    // working directory is used if none is given) using all available
-    // CPU cores
-    EncoderPool<Platform> pool(wavFiles);
-    return pool.Run();
+	try {
+		std::string pattern(
+			utils::NormalizeDirectory<Platform>(argv[1]) +
+		    (Platform::CaseSensitiveGlob ? "*.[wW][aA][vV]" : "*.wav"));
+	
+		Platform::Glob wavFiles(pattern);
+	    
+	    // Initialize and run encoder worker pool on given directory (current
+	    // working directory is used if none is given) using all available
+	    // CPU cores
+	    EncoderPool<Platform> pool(wavFiles);
+		status = pool.Run();
+	} catch(std::exception& e) {
+		utils::error("Error: %s\n", e.what());
+	} catch(...) {
+		utils::error("Internal error\n");
+	}
+
+	return status;
 }

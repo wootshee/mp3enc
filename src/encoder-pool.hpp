@@ -125,10 +125,10 @@ namespace mp3enc {
 
 						// Report success
 						threading::ScopedLock lock(_lockStdio);
-						utils::print_status(stdout, "%s: OK\n", file);
+						printf("%s: OK\n", file);
 					} catch (std::exception& e) {
 	        			threading::ScopedLock lock(_lockStdio);
-						utils::print_status(stderr, "%s: %s\n", file, e.what());
+						utils::error("%s: %s\n", file, e.what());
 						status = -1;
 												
 					}
@@ -139,7 +139,7 @@ namespace mp3enc {
 
 			} catch (std::exception& e) {
 	        	threading::ScopedLock lock(_lockStdio);
-	        	utils::print_status(stderr, "Error: %s\n", e.what());
+	        	utils::error("Error: %s\n", e.what());
 	        	status = 1;
 	        }
             return status;

@@ -30,16 +30,16 @@ namespace utils {
         }
         return dir + Platform::PathSeparator;
     }
-    
-    void print_status(FILE* to, const char* format, ...) {
+
+	void error(const char* format, ...) {
         va_list args;
         va_start(args, format);
-        vfprintf(to, format, args);
-        va_end(args);
-    }
+        vfprintf(stderr, format, args);
+        va_end(args);		
+	}
     
     void print_error(const char* prefix, int err) {
-        print_status(stderr, "%s%s\n", prefix, strerror(err));
+        error("%s%s\n", prefix, strerror(err));
     }
     
     void abort_on_error(int err) {
