@@ -4,6 +4,8 @@
 //  Copyright © 2019 Denis Shtyrov. All rights reserved.
 //
 
+#include "platform.hpp"
+
 namespace mp3enc {
 namespace platform {
 

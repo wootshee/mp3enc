@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mp3enc", "mp3enc.vcxproj", "{3CB6123C-620A-48DB-8357-DEDC6FD81CF8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{20536101-3B0E-43EF-94F9-080D595DAC57} = {20536101-3B0E-43EF-94F9-080D595DAC57}
+		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8} = {E2DAB91A-8248-4625-8A85-2C2C2A390DD8}
+		{BE6C0530-3613-4507-9D2E-440E008E3A92} = {BE6C0530-3613-4507-9D2E-440E008E3A92}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libmp3lame-static", "..\src\extern\lame\vc_solution\vc9_libmp3lame.vcxproj", "{20536101-3B0E-43EF-94F9-080D595DAC57}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pthreads4w", "pthreads4w\pthreads4w.vcxproj", "{BE6C0530-3613-4507-9D2E-440E008E3A92}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libmpghip-static", "..\src\extern\lame\vc_solution\vc9_mpglib.vcxproj", "{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+		ReleaseNASM|Win32 = ReleaseNASM|Win32
+		ReleaseSSE2|Win32 = ReleaseSSE2|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3CB6123C-620A-48DB-8357-DEDC6FD81CF8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3CB6123C-620A-48DB-8357-DEDC6FD81CF8}.Debug|Win32.Build.0 = Debug|Win32
+		{3CB6123C-620A-48DB-8357-DEDC6FD81CF8}.Release|Win32.ActiveCfg = Release|Win32
+		{3CB6123C-620A-48DB-8357-DEDC6FD81CF8}.Release|Win32.Build.0 = Release|Win32
+		{3CB6123C-620A-48DB-8357-DEDC6FD81CF8}.ReleaseNASM|Win32.ActiveCfg = Release|Win32
+		{3CB6123C-620A-48DB-8357-DEDC6FD81CF8}.ReleaseNASM|Win32.Build.0 = Release|Win32
+		{3CB6123C-620A-48DB-8357-DEDC6FD81CF8}.ReleaseSSE2|Win32.ActiveCfg = Release|Win32
+		{3CB6123C-620A-48DB-8357-DEDC6FD81CF8}.ReleaseSSE2|Win32.Build.0 = Release|Win32
+		{20536101-3B0E-43EF-94F9-080D595DAC57}.Debug|Win32.ActiveCfg = Debug|Win32
+		{20536101-3B0E-43EF-94F9-080D595DAC57}.Debug|Win32.Build.0 = Debug|Win32
+		{20536101-3B0E-43EF-94F9-080D595DAC57}.Release|Win32.ActiveCfg = Release|Win32
+		{20536101-3B0E-43EF-94F9-080D595DAC57}.Release|Win32.Build.0 = Release|Win32
+		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseNASM|Win32.ActiveCfg = ReleaseNASM|Win32
+		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseNASM|Win32.Build.0 = ReleaseNASM|Win32
+		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseSSE2|Win32.ActiveCfg = ReleaseSSE2|Win32
+		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseSSE2|Win32.Build.0 = ReleaseSSE2|Win32
+		{BE6C0530-3613-4507-9D2E-440E008E3A92}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BE6C0530-3613-4507-9D2E-440E008E3A92}.Debug|Win32.Build.0 = Debug|Win32
+		{BE6C0530-3613-4507-9D2E-440E008E3A92}.Release|Win32.ActiveCfg = Release|Win32
+		{BE6C0530-3613-4507-9D2E-440E008E3A92}.Release|Win32.Build.0 = Release|Win32
+		{BE6C0530-3613-4507-9D2E-440E008E3A92}.ReleaseNASM|Win32.ActiveCfg = Release|Win32
+		{BE6C0530-3613-4507-9D2E-440E008E3A92}.ReleaseNASM|Win32.Build.0 = Release|Win32
+		{BE6C0530-3613-4507-9D2E-440E008E3A92}.ReleaseSSE2|Win32.ActiveCfg = Release|Win32
+		{BE6C0530-3613-4507-9D2E-440E008E3A92}.ReleaseSSE2|Win32.Build.0 = Release|Win32
+		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Debug|Win32.Build.0 = Debug|Win32
+		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Release|Win32.ActiveCfg = Release|Win32
+		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Release|Win32.Build.0 = Release|Win32
+		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseNASM|Win32.ActiveCfg = ReleaseNASM|Win32
+		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseNASM|Win32.Build.0 = ReleaseNASM|Win32
+		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseSSE2|Win32.ActiveCfg = ReleaseSSE2|Win32
+		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseSSE2|Win32.Build.0 = ReleaseSSE2|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -5,6 +5,7 @@
 //
 
 #include "glob.hpp"
+#include "exception.hpp"
 
 #include <windows.h>
 #include <io.h>
@@ -28,12 +29,12 @@ namespace {
                 // No files matched the pattern
                 _error = ENOENT;
             } else {
-                throw CRuntimeError(errno);
+				throw mp3enc::CRuntimeError(errno);
             }
         }
         ~FindData() {
-            _findclose(handle);
-            handle = 0;
+            _findclose(_handle);
+            _handle = 0;
         }
 
         const char* nextFile() {
@@ -45,7 +46,7 @@ namespace {
             if (_error) {
                 // previous nextFile() call failed,
                 // report the error
-                throw CRuntimeError(_error);
+                throw mp3enc::CRuntimeError(_error);
             }
             
             // skip subdirectories
@@ -55,7 +56,7 @@ namespace {
                         // no more matches
                         return NULL;
                     }
-                    throw CRuntimeError(_error);
+                    throw mp3enc::CRuntimeError(_error);
                 }
             }
 
@@ -87,7 +88,7 @@ GlobHandle globInit(const char* pattern) {
 
 const char* globNext(GlobHandle handle) {
     FindData* glob = reinterpret_cast<FindData*>(handle);
-    assert(glob;)
+    assert(glob);
     return glob->nextFile();
 }
 
@@ -95,7 +96,6 @@ void globClose(GlobHandle handle) {
     FindData* glob = reinterpret_cast<FindData*>(handle);
     delete glob;
 }
-
 
 } // namspace platform
 } // namespace mp3enc
