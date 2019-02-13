@@ -35,7 +35,7 @@ void usage() {
     std::cout << "Usage: mp3enc <directory>" << std::endl;
 }
 
-int main(int argc, const char * argv[]) {
+int main(int argc, const char* argv[]) {
     
     if (argc != 2) {
         usage();
@@ -51,9 +51,8 @@ int main(int argc, const char * argv[]) {
     
         Glob wavFiles(pattern.c_str());
         
-        // Initialize and run encoder worker pool on given directory (current
-        // working directory is used if none is given) using all available
-        // CPU cores
+        // Initialize and run encoder worker pool on given directory
+        // using all available CPU cores
         EncoderPool pool(wavFiles);
         status = pool.Run();
     } catch(std::exception& e) {

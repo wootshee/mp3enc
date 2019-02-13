@@ -51,11 +51,16 @@ namespace utils {
     }
 
     inline
+    uint16_t swap_bytes_uint16(uint16_t value) {
+        return value = (value >> 8) | (value << 8);
+    }
+
+    inline
     uint16_t native_uint16(uint16_t value, bool bigEndian) {
         if (bigEndian != platform::BigEndian) {
             // swap bytes if target platform's endianess does not match
             // endianess of input value
-            value = (value >> 16) | (value << 16);
+            value = swap_bytes_uint16(value);
         }
         return value;
     } 
@@ -66,7 +71,7 @@ namespace utils {
             // swap bytes if target platform's endianess does not match
             // endianess of input value
             value = (value << 24) | (value >> 24) |
-            ((uint32_t) native_uint16((uint16_t)(value >> 8), bigEndian)) << 8;
+            ((uint32_t) swap_bytes_uint16((uint16_t)(value >> 8))) << 8;
         }
         return value;
     }

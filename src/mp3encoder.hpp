@@ -9,9 +9,15 @@
 
 #include "wavfile.hpp"
 
+#include <vector>
+
 namespace mp3enc {
 
-    void encode(WavFile& input, const char* outpath, size_t bufferSize = 128 * 1024);
+    void encode(
+        WavFile& input,
+        std::vector<unsigned char>& inBuf,
+        std::vector<unsigned char>& outBuf,
+        const char* outpath);
     
 } // namespace mp3enc
 

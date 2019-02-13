@@ -76,6 +76,15 @@ size_t WavFile::ReadSamples(void* dest, size_t num) {
         // Input must be corrupt!
         throw std::runtime_error("Unexpected end of WAV stream");
     }
+
+    if (platform::BigEndian != _bigendian) {
+        // PCM data needs to be converted to local machine endianness
+        uint16_t* samples = reinterpret_cast<uint16_t*>(dest);
+        for (int i = 0; i < num * _channels; ++i) {
+            samples[i] = utils::swap_bytes_uint16(samples[i]);
+        }
+    }
+
     return read;
 }
         
@@ -125,7 +134,7 @@ void WavFile::parseDataChunk() {
         throw std::runtime_error("Invalid RIFF data chunk");
 
     // Save total number of samples in input stream
-    _totalSamples = utils::native_uint32(chunk.size, _bigendian) / (_channels * 2);
+    _totalSamples = utils::native_uint32(chunk.size, _bigendian) / (_channels * GetBitsPerSample() / 8);
 }
     
 } // namespace mp3enc

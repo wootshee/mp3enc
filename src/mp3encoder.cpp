@@ -49,13 +49,18 @@ namespace {
 
 namespace mp3enc {
     // Encode WAV PCM data to MP3 stream
-    void encode(WavFile& input, const char* outpath, size_t bufferSize) {
+    void encode(
+        WavFile& input,
+        std::vector<unsigned char>& inBuf,
+        std::vector<unsigned char>& outBuf,
+        const char* outpath) {
+
         OutputFile output(outpath);
 
-        // Allocate output buffer
-        std::vector<unsigned char> outputBuf(bufferSize);
+        const size_t samplesToRead = 16384;
+        outBuf.resize(size_t(1.25 * samplesToRead + 7200));
 
-        // Prepare codec parameters
+        // Prepare codec parameters (use default quality settings)
         Lame encoder;
         lame_set_num_channels(encoder, input.GetChannels());
         lame_set_in_samplerate(encoder, input.GetSampleRate());
@@ -68,46 +73,47 @@ namespace mp3enc {
         }
 
         // Allocate input buffer of sufficient size
-        size_t samplesToRead = lame_get_maximum_number_of_samples(encoder, outputBuf.size());
-        std::vector<unsigned char> inputBuf(
-            input.GetChannels() * samplesToRead * input.GetBitsPerSample() / 8);
+        size_t requiredSize = input.GetChannels() * samplesToRead * input.GetBitsPerSample() / 8;
+        if (inBuf.size() < requiredSize) {
+            inBuf.resize(requiredSize);
+        }
 
         // Encode all input samples to output stream
         const bool mono = input.GetChannels() == 1;
         size_t read = 0;
-        while ((read = input.ReadSamples(&inputBuf[0], samplesToRead)) > 0) {
+        while ((read = input.ReadSamples(&inBuf[0], samplesToRead)) > 0) {
             int encoded = 0;
             if (mono) {
                 encoded = lame_encode_buffer(
                     encoder,
-                    reinterpret_cast<short*>(&inputBuf[0]),
-                    reinterpret_cast<short*>(&inputBuf[0]),
+                    reinterpret_cast<short*>(&inBuf[0]),
+                    reinterpret_cast<short*>(&inBuf[0]),
                     read,
-                     &outputBuf[0],
-                    outputBuf.size());
+                    &outBuf[0],
+                    static_cast<int>(outBuf.size()));
             } else {
                 encoded = lame_encode_buffer_interleaved(
                     encoder,
-                    reinterpret_cast<short*>(&inputBuf[0]),
+                    reinterpret_cast<short*>(&inBuf[0]),
                     read,
-                    &outputBuf[0],
-                    outputBuf.size());
+                    &outBuf[0],
+                    static_cast<int>(outBuf.size()));
             }
             if (encoded < 0) {
-                throw std::runtime_error("lame_encode_buffer_interleaved() failed");
+                throw std::runtime_error("lame_encode_buffer() failed");
             }
-            if (encoded != output.Write(&outputBuf[0], encoded)) {
+            if (encoded != output.Write(&outBuf[0], encoded)) {
                 throw std::runtime_error(WRITE_ERROR);
             }
         }
 
         // Flush last mp3 frame
-        const int encoded = lame_encode_flush(encoder, &outputBuf[0], outputBuf.size());
+        const int encoded = lame_encode_flush(encoder, &outBuf[0], outBuf.size());
         if (encoded < 0) {
             throw std::runtime_error("lame_encode_flush() failed");
         }
 
-        if (encoded != output.Write(&outputBuf[0], encoded)) {
+        if (encoded != output.Write(&outBuf[0], encoded)) {
             throw std::runtime_error(WRITE_ERROR);
         }
     }

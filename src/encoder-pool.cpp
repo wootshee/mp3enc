@@ -9,6 +9,7 @@
 #include "wavfile.hpp"
 
 #include <cassert>
+#include <vector>
 
 #include <stdint.h>
 
@@ -86,6 +87,10 @@ int EncoderPool::processQueue() {
     int status = 0;
     const char* file = NULL;
     try {
+        // I/O buffers are allocated by a first call to encode()
+        // function and then re-used for all subsequent files
+        std::vector<unsigned char> outBuf;
+        std::vector<unsigned char> inBuf;
         for (file = getFile(); file; file = getFile()) {
             try {
                 // Open input WAV stream
@@ -94,7 +99,7 @@ int EncoderPool::processQueue() {
                 // Encode input file to MP3 using default buffer size
                 std::string mp3name(file);
                 mp3name.replace(mp3name.begin() + mp3name.size() - 3, mp3name.end(), "mp3");
-                encode(input, mp3name.c_str());
+                encode(input, inBuf, outBuf, mp3name.c_str());
 
                 // Report success
                 threading::ScopedLock lock(_lockStdio);
