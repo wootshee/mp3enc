@@ -1,13 +1,13 @@
 //
-//  wavstream.hpp - WAV input stream
+//  wavfile.hpp - WAV input file
 //  mp3enc
 //
 //  Created by Denis Shtyrov on 10.02.19.
 //  Copyright © 2019 wootshee. All rights reserved.
 //
 
-#ifndef MP3ENC_WAVSTREAM_HPP
-#define MP3ENC_WAVSTREAM_HPP
+#ifndef MP3ENC_WAVFILE_HPP
+#define MP3ENC_WAVFILE_HPP
 
 #include "riff.hpp"
 #include "utils.hpp"
@@ -62,4 +62,4 @@ namespace mp3enc {
 	
 } // namespace mp3enc
 
-#endif // #ifndef MP3ENC_WAVSTREAM_HPP
+#endif // #ifndef MP3ENC_WAVFILE_HPP

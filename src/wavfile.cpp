@@ -1,5 +1,5 @@
 //
-//  wavstream.cpp - WAV input stream
+//  wavfile.cpp - WAV input file
 //  mp3enc
 //
 //  Created by Denis Shtyrov on 10.02.19.
@@ -9,7 +9,7 @@
 #ifndef MP3ENC_WAVSTREAM_HPP
 #define MP3ENC_WAVSTREAM_HPP
 
-#include "wavstream.hpp"
+#include "wavfile.hpp"
 
 #include "utils.hpp"
 
@@ -108,9 +108,9 @@ void WavFile::parseFormatChunk() {
     const bool validChunk = _file.ReadStruct(chunk) &&
         0 == strncmp(chunk.id, "fmt ", 4) &&
         // Only raw 16 bit PCM format is supported
-        utils::native_uint16<Platform>(chunk.size, _bigendian) == 16 &&
-        utils::native_uint16<Platform>(chunk.audio_fmt, _bigendian) == 1 &&
-        utils::native_uint16<Platform>(chunk.bits_per_sample, _bigendian) == 16;
+        utils::native_uint16(chunk.size, _bigendian) == 16 &&
+        utils::native_uint16(chunk.audio_fmt, _bigendian) == 1 &&
+        utils::native_uint16(chunk.bits_per_sample, _bigendian) == 16;
     if (!validChunk)
         throw std::runtime_error("Unsupported WAV format");
 
