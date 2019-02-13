@@ -1,24 +1,27 @@
 //
-//  platform.hpp
+//  platform.hpp - platform specific stuff
 //  mp3enc
 //
 //  Created by Denis Shtyrov on 10.02.19.
 //  Copyright © 2019 wootshee. All rights reserved.
 //
 
-#ifndef platform_hpp
-#define platform_hpp
+#ifndef MP3ENC_PLATFORM_HPP
+#define MP3ENC_PLATFORM_HPP
 
-#ifdef _WIN32
-#include "platform-win32.hpp"
 namespace mp3enc {
-    typedef Platform mp3enc::platform::Win32;
-}
-#else
-#include "platform-posix.hpp"
-namespace mp3enc {
-    typedef mp3enc::platform::Posix Platform;
-}
-#endif //#ifdef _WIN32
+namespace platform {
 
-#endif // #ifndef platform_hpp
+    // Path separator character
+    const char PathSeparator;
+    // Is target platform big endian?
+    const bool BigEndian;
+    // Does target platform support case sensitive glob masks?
+    const bool CaseSensitiveGlob;
+    // Determine number of CPUs
+    int CpuCount();
+
+} // namespace platform
+} // namespace mp3enc
+
+#endif // #ifndef MP3ENC_PLATFORM_HPP

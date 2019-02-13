@@ -14,20 +14,20 @@
 #include <string.h>
 
 namespace mp3enc {
-	class c_runtime_error : public std::exception {
+	class CRuntimeError : public std::exception {
 		int _error;
 	public:
-		c_runtime_error(int error)
+		CRuntimeError(int error)
 		: _error(error) {
 		}
 
-		virtual ~c_runtime_error() throw() {
+		virtual ~CRuntimeError() throw() {
 		}
 
 		virtual const char* what() const throw() {
 			return strerror(_error);
 		}
-	}; // class c_runtime_error
+	}; // class CRuntimeError
 } // namespace mp3enc
 
 #endif // #define MP3ENC_EXCEPTION_HPP

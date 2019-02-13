@@ -10,6 +10,7 @@
 #define utils_h
 
 #include "exception.hpp"
+#include "platform.hpp"
 
 #include <cassert>
 #include <string>
@@ -23,12 +24,11 @@
 namespace mp3enc {
 namespace utils {
     // Appends path separator after directory name if needed
-    template <typename Platform>
     std::string NormalizeDirectory(const std::string& dir) {
-        if (dir.empty() || *dir.rbegin() == Platform::PathSeparator) {
+        if (dir.empty() || *dir.rbegin() == platform::PathSeparator {
             return dir;
         }
-        return dir + Platform::PathSeparator;
+        return dir + platform::PathSeparator;
     }
 
 	void error(const char* format, ...) {
@@ -47,9 +47,8 @@ namespace utils {
         abort();
     }
 
-	template <typename Platform>
-	uint16_t native_uint16(uint16_t value, bool bigEndian) {
-		if (bigEndian != Platform::BigEndian) {
+		uint16_t native_uint16(uint16_t value, bool bigEndian) {
+		if (bigEndian != platform::BigEndian) {
 			// swap bytes if target platform's endianess does not match
 			// endianess of input value
 			value = (value >> 16) | (value << 16);
@@ -57,13 +56,12 @@ namespace utils {
 		return value;
 	} 
 
-	template <typename Platform>
-	uint32_t native_uint32(uint32_t value, bool bigEndian) {
-		if (bigEndian != Platform::BigEndian) {
+		uint32_t native_uint32(uint32_t value, bool bigEndian) {
+		if (bigEndian != platform::BigEndian) {
 			// swap bytes if target platform's endianess does not match
 			// endianess of input value
 			value = (value << 24) | (value >> 24) |
-			((uint32_t) native_uint16<Platform>((uint16_t)(value >> 8), bigEndian)) << 8;
+			((uint32_t) native_uint16((uint16_t)(value >> 8), bigEndian)) << 8;
 		}
 		return value;
 	} 
@@ -80,7 +78,7 @@ namespace utils {
 				// It is assummed that File() constructor is called from either InputFile
 				// or OutputFile constructors with return value of fopen as it's argument.
 				// Hence, we can assume that errno is still relevant at this point.
-				throw c_runtime_error(errno);
+				throw CRuntimeError(errno);
 			}
 		}
 

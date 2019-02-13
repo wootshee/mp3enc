@@ -24,6 +24,7 @@
 #include <iostream>
 #include <memory>
 
+#include "glob.hpp"
 #include "platform.hpp"
 
 #include "encoder-pool.hpp"
@@ -46,15 +47,15 @@ int main(int argc, const char * argv[]) {
 
 	try {
 		std::string pattern(
-			utils::NormalizeDirectory<Platform>(argv[1]) +
-		    (Platform::CaseSensitiveGlob ? "*.[wW][aA][vV]" : "*.wav"));
+			utils::NormalizeDirectory(argv[1]) +
+		    (platform::CaseSensitiveGlob ? "*.[wW][aA][vV]" : "*.wav"));
 	
-		Platform::Glob wavFiles(pattern);
+		Glob wavFiles(pattern.c_str());
 	    
 	    // Initialize and run encoder worker pool on given directory (current
 	    // working directory is used if none is given) using all available
 	    // CPU cores
-	    EncoderPool<Platform> pool(wavFiles);
+	    EncoderPool pool(wavFiles);
 		status = pool.Run();
 	} catch(std::exception& e) {
 		utils::error("Error: %s\n", e.what());
