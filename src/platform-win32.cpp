@@ -1,8 +1,7 @@
 //
 //  platform-win32.cpp - Windows platform definitions
 //
-//  Created by Denis Shtyrov on 10.02.19.
-//  Copyright © 2019 wootshee. All rights reserved.
+//  Copyright © 2019 Denis Shtyrov. All rights reserved.
 //
 
 namespace mp3enc {

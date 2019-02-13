@@ -1,9 +1,7 @@
 //
 //  encoder-pool.hpp
-//  mp3enc
 //
-//  Created by Denis Shtyrov on 10.02.19.
-//  Copyright © 2019 wootshee. All rights reserved.
+//  Copyright © 2019 Denis Shtyrov. All rights reserved.
 //
 
 #ifndef MP3ENC_ENCODER_POOL_H
@@ -25,13 +23,12 @@ namespace mp3enc {
         Glob& _queue;
         std::vector<pthread_t> _workers;
         bool _eof;
+
+        EncoderPool(const EncoderPool&);
+        EncoderPool& operator=(const EncoderPool&);
     public:
         EncoderPool(Glob& queue);
-        
-        // ~EncoderPool()
-        //
-        // Default compiler-generated destructor is sufficient for this class,
-        // since threads are always joined in Run() method.
+        ~EncoderPool() {};
 
         // Signals worker threads to start working on tasks. It is assumed
         // that this method is called only once per lifetime of EncoderPool

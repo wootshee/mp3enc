@@ -1,9 +1,7 @@
 //
 //  platform.hpp - platform specific stuff
-//  mp3enc
 //
-//  Created by Denis Shtyrov on 10.02.19.
-//  Copyright © 2019 wootshee. All rights reserved.
+//  Copyright © 2019 Denis Shtyrov. All rights reserved.
 //
 
 #ifndef MP3ENC_PLATFORM_HPP

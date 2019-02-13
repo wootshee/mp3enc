@@ -1,8 +1,7 @@
 //
 //  mp3stream.cpp - LAME based MP3 encoder
 //
-//  Created by Denis Shtyrov on 10.02.19.
-//  Copyright © 2019 wootshee. All rights reserved.
+//  Copyright © 2019 Denis Shtyrov. All rights reserved.
 //
 
 #include "mp3encoder.hpp"
@@ -34,6 +33,7 @@ namespace {
             lame_set_debugf(_lame, NULL);
             lame_set_msgf(_lame, NULL);
         }
+
         ~Lame() {
             if (_lame) {
                 lame_close(_lame);
@@ -59,6 +59,7 @@ namespace mp3enc {
         Lame encoder;
         lame_set_num_channels(encoder, input.GetChannels());
         lame_set_in_samplerate(encoder, input.GetSampleRate());
+        lame_set_out_samplerate(encoder, input.GetSampleRate());
         lame_set_num_samples(encoder, input.GetTotalSamples());
 
         int res = lame_init_params(encoder);
@@ -72,15 +73,26 @@ namespace mp3enc {
             input.GetChannels() * samplesToRead * input.GetBitsPerSample() / 8);
 
         // Encode all input samples to output stream
+        const bool mono = input.GetChannels() == 1;
         size_t read = 0;
         while ((read = input.ReadSamples(&inputBuf[0], samplesToRead)) > 0) {
-            const int encoded =
-                lame_encode_buffer_interleaved(
+            int encoded = 0;
+            if (mono) {
+                encoded = lame_encode_buffer(
+                    encoder,
+                    reinterpret_cast<short*>(&inputBuf[0]),
+                    reinterpret_cast<short*>(&inputBuf[0]),
+                    read,
+                     &outputBuf[0],
+                    outputBuf.size());
+            } else {
+                encoded = lame_encode_buffer_interleaved(
                     encoder,
                     reinterpret_cast<short*>(&inputBuf[0]),
                     read,
                     &outputBuf[0],
                     outputBuf.size());
+            }
             if (encoded < 0) {
                 throw std::runtime_error("lame_encode_buffer_interleaved() failed");
             }

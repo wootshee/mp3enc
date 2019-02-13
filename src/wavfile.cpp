@@ -1,13 +1,8 @@
 //
 //  wavfile.cpp - WAV input file
-//  mp3enc
 //
-//  Created by Denis Shtyrov on 10.02.19.
-//  Copyright © 2019 wootshee. All rights reserved.
+//  Copyright © 2019 Denis Shtyrov. All rights reserved.
 //
-
-#ifndef MP3ENC_WAVSTREAM_HPP
-#define MP3ENC_WAVSTREAM_HPP
 
 #include "wavfile.hpp"
 
@@ -24,25 +19,25 @@ namespace {
 #pragma pack(push, 1)
 
 struct ChunkDescriptor {
-	char id[4];
-	uint32_t size;
-	char fmt[4];
+    char id[4];
+    uint32_t size;
+    char fmt[4];
 };
 
 struct FormatChunk {
-	char id[4];
-	uint32_t size;
-	uint16_t audio_fmt;
-	uint16_t channels;
-	uint32_t sample_rate;
-	uint32_t byte_rate;
-	uint16_t block_align;
-	uint16_t bits_per_sample;
+    char id[4];
+    uint32_t size;
+    uint16_t audio_fmt;
+    uint16_t channels;
+    uint32_t sample_rate;
+    uint32_t byte_rate;
+    uint16_t block_align;
+    uint16_t bits_per_sample;
 };
 
 struct DataChunk {
-	char id[4];
-	uint32_t size;
+    char id[4];
+    uint32_t size;
 };
 
 #pragma pack(pop)
@@ -83,7 +78,7 @@ size_t WavFile::ReadSamples(void* dest, size_t num) {
     }
     return read;
 }
-		
+        
 void WavFile::parseRiffChunk() {
     // RIFF chunk descriptor
     ChunkDescriptor chunk;
@@ -132,7 +127,5 @@ void WavFile::parseDataChunk() {
     // Save total number of samples in input stream
     _totalSamples = utils::native_uint32(chunk.size, _bigendian) / (_channels * 2);
 }
-	
+    
 } // namespace mp3enc
-
-#endif // #ifndef MP3ENC_WAVSTREAM_HPP

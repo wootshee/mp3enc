@@ -1,5 +1,5 @@
 //
-//  mutex.hpp
+//  mutex.hpp - mutex and scoped locks
 //
 //  Copyright © 2019 Denis Shtyrov. All rights reserved.
 //

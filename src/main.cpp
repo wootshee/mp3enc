@@ -1,8 +1,7 @@
 //
-//  mp3enc.cpp - tiny mp3encoder
+//  tiny mp3encoder
 //
-//  Created by Denis Shtyrov on 10.02.19.
-//  Copyright © 2019 wootshee. All rights reserved.
+//  Copyright © 2019 Denis Shtyrov. All rights reserved.
 //
 
 //
@@ -43,25 +42,25 @@ int main(int argc, const char * argv[]) {
         return 1;
     }
 
-	int status = 0;
+    int status = 0;
 
-	try {
-		std::string pattern(
-			utils::NormalizeDirectory(argv[1]) +
-		    (platform::CaseSensitiveGlob ? "*.[wW][aA][vV]" : "*.wav"));
-	
-		Glob wavFiles(pattern.c_str());
-	    
-	    // Initialize and run encoder worker pool on given directory (current
-	    // working directory is used if none is given) using all available
-	    // CPU cores
-	    EncoderPool pool(wavFiles);
-		status = pool.Run();
-	} catch(std::exception& e) {
-		utils::error("Error: %s\n", e.what());
-	} catch(...) {
-		utils::error("Internal error\n");
-	}
+    try {
+        std::string pattern(
+            utils::NormalizeDirectory(argv[1]) +
+            (platform::CaseSensitiveGlob ? "*.[wW][aA][vV]" : "*.wav"));
+    
+        Glob wavFiles(pattern.c_str());
+        
+        // Initialize and run encoder worker pool on given directory (current
+        // working directory is used if none is given) using all available
+        // CPU cores
+        EncoderPool pool(wavFiles);
+        status = pool.Run();
+    } catch(std::exception& e) {
+        utils::error("Error: %s\n", e.what());
+    } catch(...) {
+        utils::error("Internal error\n");
+    }
 
-	return status;
+    return status;
 }
