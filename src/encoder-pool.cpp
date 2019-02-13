@@ -66,12 +66,12 @@ void* EncoderPool::threadProc(void* arg) {
     return reinterpret_cast<void*>(thisPtr->processQueue());
 }
 
-const char* EncoderPool::getFile() {
+std::string EncoderPool::getFile() {
     threading::ScopedLock lock(_lock);
     if (_eof)
         return NULL;
         
-    const char* file = NULL;
+    std::string file;
 
     try {            
         file = _queue.nextMatch();
@@ -85,16 +85,15 @@ const char* EncoderPool::getFile() {
         
 int EncoderPool::processQueue() {
     int status = 0;
-    const char* file = NULL;
     try {
         // I/O buffers are allocated by a first call to encode()
         // function and then re-used for all subsequent files
         std::vector<unsigned char> outBuf;
         std::vector<unsigned char> inBuf;
-        for (file = getFile(); file; file = getFile()) {
+        for (std::string file(getFile()); !file.empty(); file = getFile()) {
             try {
                 // Open input WAV stream
-                WavFile input(file);
+                WavFile input(file.c_str());
 
                 // Encode input file to MP3 using default buffer size
                 std::string mp3name(file);
@@ -103,11 +102,11 @@ int EncoderPool::processQueue() {
 
                 // Report success
                 threading::ScopedLock lock(_lockStdio);
-                printf("%s: OK\n", file);
+                printf("%s: OK\n", file.c_str());
             } catch (std::exception& e) {
                 // Failed to process data
                 threading::ScopedLock lock(_lockStdio);
-                utils::error("%s: %s\n", file, e.what());
+                utils::error("%s: %s\n", file.c_str(), e.what());
                 status = -1;
                                         
             }

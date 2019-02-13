@@ -38,7 +38,7 @@ namespace mp3enc {
     private:
 
         static void* threadProc(void* arg);
-        const char* getFile();
+        std::string getFile();
         int processQueue();
     }; // class EncoderPool
 } // namespace mp3enc

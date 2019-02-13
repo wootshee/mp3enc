@@ -7,6 +7,8 @@
 #ifndef MP3ENC_GLOB_HPP
 #define MP3ENC_GLOB_HPP
 
+#include <string>
+
 namespace mp3enc {
     namespace platform {
         //
@@ -20,7 +22,7 @@ namespace mp3enc {
         //
     
         GlobHandle globInit(const char* pattern);
-        const char* globNext(GlobHandle handle);
+        std::string globNext(GlobHandle handle);
         void globClose(GlobHandle handle);
     
     } //namespace platform
@@ -42,7 +44,7 @@ namespace mp3enc {
             }
         }
 
-        const char* nextMatch() {
+        std::string nextMatch() {
             return platform::globNext(_handle);
         }
     }; // class Glob
