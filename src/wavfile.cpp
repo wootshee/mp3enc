@@ -86,7 +86,7 @@ size_t WavFile::ReadSamples(void* dest, size_t num) {
 		
 void WavFile::parseRiffChunk() {
     // RIFF chunk descriptor
-    riff::ChunkDescriptor chunk;
+    ChunkDescriptor chunk;
 
     // Read chunk descriptor and validate it
     const bool validChunk = _file.ReadStruct(chunk) &&
@@ -102,7 +102,7 @@ void WavFile::parseRiffChunk() {
 
 void WavFile::parseFormatChunk() {
     // Format sub-chunk
-    riff::FormatChunk chunk;
+    FormatChunk chunk;
 
     // Read chunk descriptor and validate it
     const bool validChunk = _file.ReadStruct(chunk) &&
@@ -121,7 +121,7 @@ void WavFile::parseFormatChunk() {
 
 void WavFile::parseDataChunk() {
     // Data sub-chunk
-    riff::DataChunk chunk;
+    DataChunk chunk;
 
     // Read chunk descriptor and validate it
     const bool validChunk = _file.ReadStruct(chunk) &&

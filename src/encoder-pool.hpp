@@ -11,15 +11,10 @@
 
 #include "glob.hpp"
 #include "mutex.hpp"
-#include "mp3stream.hpp"
-#include "platform.hpp"
-#include "wavstream.hpp"
 
-#include <cassert>
 #include <vector>
 
 #include <pthread.h>
-#include <stdint.h>
 
 namespace mp3enc {
     // EncoderPool class manages a pool of worker threads

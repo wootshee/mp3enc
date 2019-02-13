@@ -6,8 +6,12 @@
 //
 
 #include "encoder-pool.hpp"
+#include "mp3encoder.hpp"
+#include "wavfile.hpp"
 
 #include <cassert>
+
+#include <stdint.h>
 
 namespace mp3enc {
   
@@ -86,21 +90,18 @@ int EncoderPool::processQueue() {
         for (file = getFile(); file; file = getFile()) {
             try {
                 // Open input WAV stream
-                WavInputStream input(file);
+                WavFile input(file);
 
-                // Create output MP3 stream
+                // Encode input file to MP3 using default buffer size
                 std::string mp3name(file);
                 mp3name.replace(mp3name.begin() + mp3name.size() - 3, mp3name.end(), "mp3");
-                Mp3OutputStream output(mp3name.c_str());
-
-                // Encode audio stream
-                output.AttachToInputStream(&input);
-                output.Encode();
+                encode(input, mp3name.c_str());
 
                 // Report success
                 threading::ScopedLock lock(_lockStdio);
                 printf("%s: OK\n", file);
             } catch (std::exception& e) {
+                // Failed to process data
                 threading::ScopedLock lock(_lockStdio);
                 utils::error("%s: %s\n", file, e.what());
                 status = -1;
@@ -112,6 +113,7 @@ int EncoderPool::processQueue() {
         status = 0;
 
     } catch (std::exception& e) {
+        // Input queue thrown critical error
         threading::ScopedLock lock(_lockStdio);
         utils::error("Error: %s\n", e.what());
         status = 1;

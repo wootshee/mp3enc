@@ -13,11 +13,11 @@ namespace mp3enc {
 namespace platform {
 
     // Path separator character
-    const char PathSeparator;
+    extern const char PathSeparator;
     // Is target platform big endian?
-    const bool BigEndian;
+    extern const bool BigEndian;
     // Does target platform support case sensitive glob masks?
-    const bool CaseSensitiveGlob;
+    extern const bool CaseSensitiveGlob;
     // Determine number of CPUs
     int CpuCount();
 

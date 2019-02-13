@@ -9,16 +9,13 @@
 #ifndef MP3ENC_WAVFILE_HPP
 #define MP3ENC_WAVFILE_HPP
 
-#include "riff.hpp"
+#include "file.hpp"
 #include "utils.hpp"
-
-#include <stdexcept>
-#include <string>
 
 namespace mp3enc {
 
 	class WavFile {
-		utils::InputFile _file;
+		InputFile _file;
 		bool _bigendian;
 		// since original WAV format uses 32 bit size fields
 		// they should also fit in ints

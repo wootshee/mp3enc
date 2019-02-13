@@ -7,6 +7,8 @@
 
 #include "config.h"
 
+#include "platform.hpp"
+
 #include <unistd.h>
 
 namespace mp3enc {
@@ -16,12 +18,12 @@ const char PathSeparator = '/';
 const bool CaseSensitiveGlob = true;
 
 #ifdef WORDS_BIGENDIAN
-static const bool BigEndian = true;
+const bool BigEndian = true;
 #else
-static const bool BigEndian = false;
+const bool BigEndian = false;
 #endif
 
-int CpuCores() {
+int CpuCount() {
     return static_cast<int>(sysconf(_SC_NPROCESSORS_ONLN));
 }
 
