@@ -60,7 +60,7 @@ namespace mp3enc {
 		
 	public:
 
-		Mp3OutputStream(const char* filepath, size_t bufferSize = 128 * 1024 * 1024)
+		Mp3OutputStream(const char* filepath, size_t bufferSize = 128 * 1024)
 		: _file(filepath)
 		, _input(NULL)
 		, _samplesToRead(0)
