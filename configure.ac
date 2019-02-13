@@ -4,7 +4,7 @@
 AC_PREREQ([2.69])
 AC_INIT([mp3enc], [0.1], [denis.shtyrov@gmail.com])
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
-AC_CONFIG_SRCDIR([src/mp3enc.cpp])
+AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
