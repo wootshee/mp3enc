@@ -63,7 +63,7 @@ namespace {
                 return _data.gl_pathv[_consumed++];
             
             // No more files left
-            return NULL;
+            return "";
         }
     }; // class Glob
 
@@ -76,7 +76,7 @@ GlobHandle globInit(const char* pattern) {
     return reinterpret_cast<GlobHandle>(new PosixGlob(pattern));
 }
 
-const char* globNext(GlobHandle handle) {
+std::string globNext(GlobHandle handle) {
     assert(handle);
     PosixGlob* posixGlob = reinterpret_cast<PosixGlob*>(handle);
     return posixGlob->nextFile();
