@@ -43,7 +43,7 @@ int main(int argc, const char* argv[]) {
 
     try {
         // Find all .wav files in a given directory using file globbing.
-        // In case target paltform supports case sensitive file systems,
+        // In case target platform supports case sensitive file systems,
         // use extended globbing pattern syntax.
         std::string pattern(
             utils::NormalizeDirectory(argv[1]) +
