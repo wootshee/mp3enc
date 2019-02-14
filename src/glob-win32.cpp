@@ -22,35 +22,35 @@ namespace {
     class FindData {
         intptr_t _handle;
         _finddata_t _data;
-		std::string _fullPath;
-		std::string::size_type _dirEnd;
+        std::string _fullPath;
+        std::string::size_type _dirEnd;
         int _error;
 
     public:
         FindData(const char* pattern)
         : _handle(_findfirst(pattern, &_data))
-		, _fullPath(pattern)
+        , _fullPath(pattern)
         , _error(0) {
             if (!_handle)
                 if (errno == ENOENT) {
                 // No files matched the pattern
                 _error = ENOENT;
             } else {
-				throw mp3enc::CRuntimeError(errno);
+                throw mp3enc::CRuntimeError(errno);
             }
 
-			// find and save directory end position within pattern string
-			_dirEnd = _fullPath.find_last_of(mp3enc::platform::PathSeparator);
-			if (_dirEnd != _fullPath.npos)
-				_dirEnd++;
-			else
-				_dirEnd = 0;
-			if (_error == 0) {
-				// Windows stores only file names in _finddata structure.
-				// Hence, it is a programmer's task to keep track of
-				// full paths for matched files
-				_fullPath.replace(_dirEnd, _fullPath.npos, _data.name);
-			}
+            // find and save directory end position within pattern string
+            _dirEnd = _fullPath.find_last_of(mp3enc::platform::PathSeparator);
+            if (_dirEnd != _fullPath.npos)
+                _dirEnd++;
+            else
+                _dirEnd = 0;
+            if (_error == 0) {
+                // Windows stores only file names in _finddata structure.
+                // Hence, it is a programmer's task to keep track of
+                // full paths for matched files
+                _fullPath.replace(_dirEnd, _fullPath.npos, _data.name);
+            }
         }
         ~FindData() {
             _findclose(_handle);
@@ -94,9 +94,9 @@ namespace {
             if (error) {
                 _error = errno;
             }
-			if (_error == 0) {
-				_fullPath.replace(_dirEnd, _fullPath.npos, _data.name);
-			}
+            if (_error == 0) {
+                _fullPath.replace(_dirEnd, _fullPath.npos, _data.name);
+            }
             return error == 0;
         }  
     };
