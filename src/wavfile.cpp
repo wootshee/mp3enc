@@ -75,7 +75,7 @@ size_t WavFile::ReadSamples(void* dest, size_t num) {
 
     if (read == 0 && _samplesRead != _totalSamples) {
         // We reached EOF and read unexpected number of samples.
-        // Input must be corrupt!
+        // Input file must be corrupt!
         throw std::runtime_error("Unexpected end of WAV stream");
     }
 
@@ -103,7 +103,6 @@ void WavFile::parseRiffChunk() {
 
     // Is the data stored in big endian (RIFX) format?
     _bigendian = (chunk.id[3] == 'X');
-
 }
 
 void WavFile::parseFormatChunk() {
@@ -123,6 +122,7 @@ void WavFile::parseFormatChunk() {
     // Save audio format parameters
     _channels = utils::native_uint16(chunk.channels, _bigendian);
     _sampleRate = utils::native_uint32(chunk.sample_rate, _bigendian);
+    _bitsPerSample = utils::native_uint16(chunk.bits_per_sample, _bigendian);
 }
 
 void WavFile::parseDataChunk() {

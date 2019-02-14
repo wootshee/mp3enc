@@ -7,10 +7,8 @@
 #ifndef MP3ENC_UTILS_HPP
 #define MP3ENC_UTILS_HPP
 
-#include "exception.hpp"
 #include "platform.hpp"
 
-#include <cassert>
 #include <cerrno>
 #include <string>
 

@@ -13,6 +13,13 @@
 
 namespace mp3enc {
 
+    // "Sometimes, the elegant implementation is just a function.
+    //  Not a method.  Not a class.  Not a framework.  Just a function."
+    //  © John Carmack
+ 
+    // encode() function encodes WAV input file to MP3 taking care of
+    // input/outbut buffers. The input/outbut buffers can be re-used
+    // between encode() calls.
     void encode(
         WavFile& input,
         std::vector<unsigned char>& inBuf,

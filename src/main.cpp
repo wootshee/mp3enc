@@ -13,15 +13,10 @@
 //
 // Hence, I won't use the features from Cx11 and newer standards
 // (thread support, smart pointers, lambdas and other fancy stuff)
-// and focus on simplicity of the code. If extendability to other
-// input/output formats would be desired, I would design the code
-// differently :)
+// and focus on simplicity of the code.
 //
 
 #include <config.h>
-
-#include <iostream>
-#include <memory>
 
 #include "glob.hpp"
 #include "platform.hpp"
@@ -29,10 +24,12 @@
 #include "encoder-pool.hpp"
 #include "utils.hpp"
 
+#include <stdio.h>
+
 using namespace mp3enc;
 
 void usage() {
-    std::cout << "Usage: mp3enc <directory>" << std::endl;
+    puts("Usage: mp3enc <directory>)");
 }
 
 int main(int argc, const char* argv[]) {

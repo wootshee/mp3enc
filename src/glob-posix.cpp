@@ -16,6 +16,7 @@
 
 #include <glob.h>
 #include <memory.h>
+#include <string.h>
 
 namespace {
 
@@ -27,7 +28,7 @@ namespace {
         : _consumed(0) {
             memset(&_data, 0, sizeof(glob_t));
 
-            // To maintain compatibility Win32 find_first/find_next,
+            // To maintain compatibility Win32 _findfirst/_findnext,
             // which silently ignore files on errors, POSIX glob
             // implementation ignores them as well
             int res = glob(pattern, GLOB_MARK, NULL, &_data);
@@ -79,7 +80,7 @@ GlobHandle globInit(const char* pattern) {
 std::string globNext(GlobHandle handle) {
     assert(handle);
     PosixGlob* posixGlob = reinterpret_cast<PosixGlob*>(handle);
-    return posixGlob->nextFile();
+    return std::string(posixGlob->nextFile());
 }
 
 void globClose(GlobHandle handle) {

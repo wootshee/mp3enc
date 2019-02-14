@@ -20,6 +20,8 @@ namespace threading {
     class Mutex {
         pthread_mutex_t _mutex;
         
+        Mutex(const Mutex&);
+        Mutex& operator=(const Mutex&);
     public:
         Mutex(bool createLocked = false) {
             // Default mutex settings are sufficient for the task
@@ -54,6 +56,9 @@ namespace threading {
     // Scoped lock for convenience
     class ScopedLock {
         Mutex& _mutex;
+
+        ScopedLock(const ScopedLock&);
+        ScopedLock& operator=(const ScopedLock&);
     public:
         ScopedLock(Mutex& mutex)
         : _mutex(mutex) {
@@ -68,4 +73,4 @@ namespace threading {
 } // namespace threading
 } // namespace mp3enc
 
-#endif /* MP3ENC_MUTEX_HPP */
+#endif // #ifndef MP3ENC_MUTEX_HPP

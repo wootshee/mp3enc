@@ -1,5 +1,5 @@
 //
-//  glob-win32.hpp - Windows file globbing
+//  glob-win32.cpp - Windows file globbing
 //
 //  Copyright © 2019 Denis Shtyrov. All rights reserved.
 //
@@ -39,13 +39,13 @@ namespace {
 				throw mp3enc::CRuntimeError(errno);
             }
 
-			// find and save directory end position within patter string
+			// find and save directory end position within pattern string
 			_dirEnd = _fullPath.find_last_of(mp3enc::platform::PathSeparator);
 			if (_dirEnd != _fullPath.npos)
 				_dirEnd++;
 			else
 				_dirEnd = 0;
-			if (_error == 0 || _error == ENOENT) {
+			if (_error == 0) {
 				// Windows stores only file names in _finddata structure.
 				// Hence, it is a programmer's task to keep track of
 				// full paths for matched files
@@ -94,7 +94,7 @@ namespace {
             if (error) {
                 _error = errno;
             }
-			if (_error == 0 || _error == ENOENT) {
+			if (_error == 0) {
 				_fullPath.replace(_dirEnd, _fullPath.npos, _data.name);
 			}
             return error == 0;

@@ -1,5 +1,5 @@
 //
-//  mp3stream.cpp - LAME based MP3 encoder
+//  mp3encoder.cpp - LAME based MP3 encoder
 //
 //  Copyright © 2019 Denis Shtyrov. All rights reserved.
 //
@@ -28,7 +28,9 @@ namespace {
     public:
         Lame()
         : _lame(lame_init()) {
-            assert(_lame);
+            if (!_lame) {
+                throw std::runtime_error("lame_init() failed");
+            }
             // Silence lame and let EncoderPool
             // report errors in controlled manner
             lame_set_errorf(_lame, NULL);
@@ -69,13 +71,13 @@ namespace mp3enc {
         lame_set_out_samplerate(encoder, input.GetSampleRate());
         lame_set_num_samples(encoder, input.GetTotalSamples());
 
-        int res = lame_init_params(encoder);
+        const int res = lame_init_params(encoder);
         if (res < 0) {
-            throw std::runtime_error("Failed to initialize LAME encoder");
+            throw std::runtime_error("lame_init_params() failed");
         }
 
         // Allocate input buffer of sufficient size
-        size_t requiredSize = input.GetChannels() * samplesToRead * input.GetBitsPerSample() / 8;
+        const size_t requiredSize = input.GetChannels() * samplesToRead * input.GetBitsPerSample() / 8;
         if (inBuf.size() < requiredSize) {
             inBuf.resize(requiredSize);
         }

@@ -14,13 +14,16 @@ namespace mp3enc {
 
     class WavFile {
         InputFile _file;
+        // Does input file use big endian integer format?
         bool _bigendian;
-        // since original WAV format uses 32 bit size fields
-        // they should also fit in ints
+        // Total number of samples stored in a file
         size_t _totalSamples;
+        // Samples read so far
         size_t _samplesRead;
+        // Input audio stream parameters
         int _channels;
         int _sampleRate;
+        int _bitsPerSample;
     
         WavFile(const WavFile&);
         WavFile& operator=(const WavFile&);
@@ -43,9 +46,13 @@ namespace mp3enc {
         }
 
         int GetBitsPerSample() const {
-            return 16;
+            return _bitsPerSample;
         }
 
+        // Read num samples from input WAV file and return
+        // the actual number of samples read. Both 'num' argument
+        // and method's return value specify number of samples
+        // per channel (not the sum of samples in all channels)
         size_t ReadSamples(void* dest, size_t num);
         
     private:

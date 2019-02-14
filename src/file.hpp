@@ -10,22 +10,16 @@
 #include "exception.hpp"
 #include "platform.hpp"
 
-#include <cassert>
 #include <cerrno>
-#include <string>
 
-#include <stdarg.h>
 #include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
 
 namespace mp3enc {
 
     // Here I use simple C-stream based file class for the sake of unified (errno based)
     // error reporting.
     class File {
-        // No copying, please
+        // Not for copying
         File(const File&);
         File& operator=(const File&);
     public:
@@ -58,7 +52,7 @@ namespace mp3enc {
         
     protected:
         FILE* _file;
-    }; // FilePtr
+    }; // class File
 
     class InputFile : public File {
         InputFile(const InputFile&);

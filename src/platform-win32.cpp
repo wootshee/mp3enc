@@ -32,4 +32,3 @@ int CpuCount() {
 
 } // namespace platform
 } // namespace mp3enc
-

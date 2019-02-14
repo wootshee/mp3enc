@@ -20,7 +20,7 @@ namespace mp3enc {
 EncoderPool::EncoderPool(Glob& queue)
 // the mutex is created locked to block the workers
 // until Run() method is called
-: _lock(true)
+: _lockQueue(true)
 , _queue(queue)
 , _workers(platform::CpuCount())
 , _eof(false) {
@@ -44,8 +44,8 @@ int EncoderPool::Run() {
         }
     }
 
-    // Release the mutex and let the workers do their work
-    _lock.Unlock();
+    // Release the queue lock and let the workers do their work
+    _lockQueue.Unlock();
     
     int status = 0;
     
@@ -69,9 +69,9 @@ void* EncoderPool::threadProc(void* arg) {
 }
 
 std::string EncoderPool::getFile() {
-    threading::ScopedLock lock(_lock);
+    threading::ScopedLock lock(_lockQueue);
     if (_eof)
-        return NULL;
+        return std::string();
         
     std::string file;
 
@@ -110,7 +110,6 @@ int EncoderPool::processQueue() {
                 threading::ScopedLock lock(_lockStdio);
                 utils::error("%s: %s\n", file.c_str(), e.what());
                 status = -1;
-                                        
             }
         }
 

@@ -12,6 +12,9 @@
 #include <string.h>
 
 namespace mp3enc {
+
+    // Class that wraps up C runtime errors in std::exception
+    // interface
     class CRuntimeError : public std::exception {
         int _error;
     public:
@@ -23,7 +26,10 @@ namespace mp3enc {
         }
 
         virtual const char* what() const throw() {
-            return strerror(_error);
+            const char* msg = strerror(_error);
+            // strerror() on POSIX.1-2001 systems may return NULL.
+            // Handle it gracefully
+            return msg ? msg : "Unexpected error";
         }
     }; // class CRuntimeError
 } // namespace mp3enc
