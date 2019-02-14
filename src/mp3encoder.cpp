@@ -4,6 +4,8 @@
 //  Copyright © 2019 Denis Shtyrov. All rights reserved.
 //
 
+#include <config.h>
+
 #include "mp3encoder.hpp"
 #include "file.hpp"
 

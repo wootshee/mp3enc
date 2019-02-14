@@ -4,7 +4,11 @@
 //  Copyright © 2019 Denis Shtyrov. All rights reserved.
 //
 
+#include <config.h>
+
 #include "platform.hpp"
+
+#include <Windows.h>
 
 namespace mp3enc {
 namespace platform {
@@ -14,14 +18,16 @@ const bool CaseSensitiveGlob = false;
 
 // Cannot imagine a better way of detecting
 // machine endianness on Windows...
-#if REG_WORD == REG_DWORD_LITTLE_ENDIAN
+#if REG_DWORD == REG_DWORD_LITTLE_ENDIAN
 const bool BigEndian = false;
 #else
 const bool BigEndian = true;
 #endif
 
 int CpuCount() {
-    return 1;
+    SYSTEM_INFO info;
+	GetSystemInfo(&info);
+	return info.dwNumberOfProcessors;
 }
 
 } // namespace platform

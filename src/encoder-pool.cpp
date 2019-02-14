@@ -4,6 +4,8 @@
 //  Copyright © 2019 Denis Shtyrov. All rights reserved.
 //
 
+#include <config.h>
+
 #include "encoder-pool.hpp"
 #include "mp3encoder.hpp"
 #include "wavfile.hpp"
@@ -33,7 +35,7 @@ EncoderPool::EncoderPool(Glob& queue)
 //        
 int EncoderPool::Run() {
     // Create worker pool
-    for (int i = 0; i < _workers.size(); ++i) {
+    for (size_t i = 0; i < _workers.size(); ++i) {
         const int res = pthread_create(&_workers[i], NULL, threadProc, this);
         if (res != 0) {
             // It is highly unlikely that pthread_create() fails on a healthy system.
@@ -48,7 +50,7 @@ int EncoderPool::Run() {
     int status = 0;
     
     // wait until workers finish their tasks
-    for (int i = 0; i < _workers.size(); ++i) {
+    for (size_t i = 0; i < _workers.size(); ++i) {
         uintptr_t workerStatus = 0;
         const int res = pthread_join(_workers[i], (void**) &workerStatus);
         assert(res == 0);

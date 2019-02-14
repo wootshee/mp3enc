@@ -4,6 +4,8 @@
 //  Copyright © 2019 Denis Shtyrov. All rights reserved.
 //
 
+#include <config.h>
+
 #include "wavfile.hpp"
 
 #include "utils.hpp"
@@ -80,7 +82,7 @@ size_t WavFile::ReadSamples(void* dest, size_t num) {
     if (platform::BigEndian != _bigendian) {
         // PCM data needs to be converted to local machine endianness
         uint16_t* samples = reinterpret_cast<uint16_t*>(dest);
-        for (int i = 0; i < num * _channels; ++i) {
+        for (size_t i = 0; i < num * _channels; ++i) {
             samples[i] = utils::swap_bytes_uint16(samples[i]);
         }
     }
