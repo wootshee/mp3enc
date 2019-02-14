@@ -57,8 +57,7 @@ int main(int argc, const char* argv[]) {
         status = pool.Run();
     } catch(std::exception& e) {
         utils::error("Error: %s\n", e.what());
-    } catch(...) {
-        utils::error("Internal error\n");
+        status = 1;
     }
 
     return status;
