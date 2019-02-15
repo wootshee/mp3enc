@@ -29,7 +29,7 @@
 using namespace mp3enc;
 
 void usage() {
-    puts("Usage: mp3enc <directory>)");
+    puts("Usage: mp3enc <directory>");
 }
 
 int main(int argc, const char* argv[]) {
