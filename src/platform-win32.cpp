@@ -26,8 +26,8 @@ const bool BigEndian = true;
 
 int CpuCount() {
     SYSTEM_INFO info;
-	GetSystemInfo(&info);
-	return info.dwNumberOfProcessors;
+    GetSystemInfo(&info);
+    return info.dwNumberOfProcessors;
 }
 
 } // namespace platform

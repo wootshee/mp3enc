@@ -14,6 +14,7 @@
 #include <vector>
 
 #include <stdint.h>
+#include <stdlib.h>
 
 namespace mp3enc {
   
@@ -86,7 +87,7 @@ std::string EncoderPool::getFile() {
 }
         
 int EncoderPool::processQueue() {
-    int status = 0;
+    int status = EXIT_SUCCESS;
     try {
         // I/O buffers are allocated by a first call to encode()
         // function and then re-used for all subsequent files
@@ -106,21 +107,17 @@ int EncoderPool::processQueue() {
                 threading::ScopedLock lock(_lockStdio);
                 printf("%s: OK\n", file.c_str());
             } catch (std::exception& e) {
-                // Failed to process data
+                // Failed to process file
                 threading::ScopedLock lock(_lockStdio);
                 utils::error("%s: %s\n", file.c_str(), e.what());
-                status = -1;
+                status = EXIT_FAILURE;
             }
         }
-
-        // Worker completed successfully
-        status = 0;
-
     } catch (std::exception& e) {
-        // Input queue thrown critical error
+        // Input queue threw critical error
         threading::ScopedLock lock(_lockStdio);
         utils::error("Error: %s\n", e.what());
-        status = 1;
+        status = EXIT_FAILURE;
     }
     return status;
 }

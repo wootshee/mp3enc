@@ -32,9 +32,9 @@ namespace mp3enc {
             }
         }
 
-        // It is expected that objects of this class are always allocated on the stack
-        // and never used through pointers. Therefore it is safe to use non-virtual
-        // destructor here.
+        // It is expected that objects of this and derived classes are always placed
+        // on the stack and never deleted through pointers. Therefore, it is acceptable
+        // to use non-virtual destructor here.
         ~File() {
             if (_file) {
                 fclose(_file);

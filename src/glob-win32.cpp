@@ -80,7 +80,7 @@ namespace {
                 }
             }
 
-            std::string matchedFile(_fullPath.c_str());
+            std::string matchedFile(_fullPath);
             // Fetch next file. If error occurs in findNext(),
             // it will be reported on next globNext() call.
             findNext();
